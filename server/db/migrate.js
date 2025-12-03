@@ -1,6 +1,12 @@
 import pool from './pool.js';
 
 const createTables = async () => {
+  // Check if DATABASE_URL is set
+  if (!process.env.DATABASE_URL) {
+    console.warn('⚠️  Skipping database setup - DATABASE_URL not set');
+    return;
+  }
+
   const client = await pool.connect();
   
   try {
