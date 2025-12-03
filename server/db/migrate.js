@@ -45,7 +45,7 @@ const createTables = async (retries = 5, delay = 3000) => {
         if (objectsTableExists.rows[0].exists) {
           console.log('⚙️  Objects table exists, checking columns...');
           
-          // Проверка наличия колонки created_by
+          // Проверка и добавление колонки created_by
           const createdByExists = await client.query(`
             SELECT EXISTS (
               SELECT FROM information_schema.columns 
@@ -54,13 +54,34 @@ const createTables = async (retries = 5, delay = 3000) => {
           `);
           
           if (!createdByExists.rows[0].exists) {
-            console.log('📝 Adding created_by column to objects table...');
-            await client.query(`
-              ALTER TABLE objects 
-              ADD COLUMN created_by INTEGER REFERENCES users(id),
-              ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            `);
+            console.log('📝 Adding created_by column...');
+            await client.query(`ALTER TABLE objects ADD COLUMN created_by INTEGER REFERENCES users(id)`);
+          }
+          
+          // Проверка и добавление колонки created_at
+          const createdAtExists = await client.query(`
+            SELECT EXISTS (
+              SELECT FROM information_schema.columns 
+              WHERE table_name = 'objects' AND column_name = 'created_at'
+            )
+          `);
+          
+          if (!createdAtExists.rows[0].exists) {
+            console.log('📝 Adding created_at column...');
+            await client.query(`ALTER TABLE objects ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+          }
+          
+          // Проверка и добавление колонки updated_at
+          const updatedAtExists = await client.query(`
+            SELECT EXISTS (
+              SELECT FROM information_schema.columns 
+              WHERE table_name = 'objects' AND column_name = 'updated_at'
+            )
+          `);
+          
+          if (!updatedAtExists.rows[0].exists) {
+            console.log('📝 Adding updated_at column...');
+            await client.query(`ALTER TABLE objects ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
           }
         } else {
           console.log('📝 Creating objects table...');
