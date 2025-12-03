@@ -16,6 +16,58 @@ export default function PlannerPageNew({ user }) {
   const [newObjectName, setNewObjectName] = useState('');
   const [newSectionNumber, setNewSectionNumber] = useState('');
   const [newSectionName, setNewSectionName] = useState('');
+  const [exporting, setExporting] = useState(null);
+
+  const columnContainerStyle = {
+    background: '#fff',
+    borderRadius: '16px',
+    padding: '1.5rem',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 'calc(100vh - 5rem)'
+  };
+
+  const headerRowStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1.25rem',
+    paddingBottom: '1rem',
+    borderBottom: '2px solid #f0f0f0',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  };
+
+  const listContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    flex: 1,
+    overflowY: 'auto'
+  };
+
+  const emptyStateStyle = {
+    textAlign: 'center',
+    padding: '2rem 1rem',
+    color: '#8e8e93',
+    fontSize: '0.9rem',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '0.5rem'
+  };
+
+  const badgeStyle = {
+    background: '#e5e5ea',
+    color: '#1c1c1e',
+    borderRadius: '8px',
+    padding: '0.15rem 0.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '600'
+  };
 
   useEffect(() => {
     loadObjects();
@@ -191,6 +243,44 @@ export default function PlannerPageNew({ user }) {
     }
   };
 
+  const downloadSectionExport = (blob, prefix) => {
+    if (!blob) {
+      return;
+    }
+
+    const sectionLabel = selectedSection
+      ? `section-${selectedSection.section_number}`
+      : 'section';
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${prefix}-${sectionLabel}-${timestamp}.xml`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportSection = async (mode) => {
+    if (!selectedSection) {
+      alert('Выберите секцию для экспорта');
+      return;
+    }
+
+    setExporting(mode);
+    try {
+      const request = mode === 'actual' ? planner.exportCompletedSection : planner.exportSection;
+      const response = await request(selectedSection.id);
+      downloadSectionExport(response.data, mode === 'actual' ? 'facts' : 'project');
+    } catch (error) {
+      console.error('Ошибка экспорта файла:', error);
+      alert(error.response?.data?.error || 'Не удалось выгрузить XML');
+    } finally {
+      setExporting(null);
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 B';
     if (bytes < 1024) return bytes + ' B';
@@ -214,7 +304,7 @@ export default function PlannerPageNew({ user }) {
     <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: '#1c1c1e' }}>
-          📋 Панель плановика
+          Панель плановика
         </h2>
 
         {error && (
@@ -223,13 +313,9 @@ export default function PlannerPageNew({ user }) {
             color: '#fff',
             padding: '1rem',
             borderRadius: '12px',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
+            marginBottom: '1rem'
           }}>
-            <span style={{ fontSize: '1.5rem' }}>⚠️</span>
-            <span>{error}</span>
+            {error}
           </div>
         )}
 
@@ -237,36 +323,16 @@ export default function PlannerPageNew({ user }) {
           display: 'grid', 
           gridTemplateColumns: '320px 320px 1fr', 
           gap: '1.5rem',
-          alignItems: 'start'
+          alignItems: 'stretch',
+          minHeight: 'calc(100vh - 4rem)'
         }}>
           
           {/* КОЛОНКА 1: ОБЪЕКТЫ */}
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            position: 'sticky',
-            top: '1.5rem'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              paddingBottom: '1rem',
-              borderBottom: '2px solid #f0f0f0'
-            }}>
+          <div style={{ ...columnContainerStyle }}>
+            <div style={headerRowStyle}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🏗️ Объекты
-                <span style={{ 
-                  background: '#e5e5ea', 
-                  color: '#1c1c1e',
-                  borderRadius: '8px',
-                  padding: '0.15rem 0.5rem',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
-                }}>
+                Объекты
+                <span style={badgeStyle}>
                   {objects.length}
                 </span>
               </h3>
@@ -284,16 +350,11 @@ export default function PlannerPageNew({ user }) {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '70vh', overflowY: 'auto' }}>
+            <div style={listContainerStyle}>
               {objects.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '2rem 1rem', 
-                  color: '#8e8e93',
-                  fontSize: '0.9rem'
-                }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>🏗️</div>
-                  Нет объектов.<br/>Создайте первый объект.
+                <div style={emptyStateStyle}>
+                  <strong style={{ fontSize: '1rem' }}>Нет объектов</strong>
+                  <span>Создайте первый объект.</span>
                 </div>
               ) : (
                 objects.map(obj => (
@@ -325,7 +386,7 @@ export default function PlannerPageNew({ user }) {
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span>📦 Секций: {obj.sections_count || 0}</span>
+                      <span>Секций: {obj.sections_count || 0}</span>
                       {selectedObject?.id === obj.id && (
                         <button
                           onClick={(e) => {
@@ -343,7 +404,7 @@ export default function PlannerPageNew({ user }) {
                             fontWeight: '600'
                           }}
                         >
-                          🗑️
+                          Удалить
                         </button>
                       )}
                     </div>
@@ -354,35 +415,12 @@ export default function PlannerPageNew({ user }) {
           </div>
 
           {/* КОЛОНКА 2: СЕКЦИИ */}
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            position: 'sticky',
-            top: '1.5rem'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              paddingBottom: '1rem',
-              borderBottom: '2px solid #f0f0f0'
-            }}>
+          <div style={{ ...columnContainerStyle }}>
+            <div style={headerRowStyle}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                📦 Секции
+                Секции
                 {sections.length > 0 && (
-                  <span style={{ 
-                    background: '#e5e5ea', 
-                    color: '#1c1c1e',
-                    borderRadius: '8px',
-                    padding: '0.15rem 0.5rem',
-                    fontSize: '0.85rem',
-                    fontWeight: '600'
-                  }}>
-                    {sections.length}
-                  </span>
+                  <span style={badgeStyle}>{sections.length}</span>
                 )}
               </h3>
               {selectedObject && (
@@ -402,27 +440,16 @@ export default function PlannerPageNew({ user }) {
             </div>
 
             {!selectedObject ? (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem 1rem', 
-                color: '#8e8e93',
-                fontSize: '0.9rem'
-              }}>
-                <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>👈</div>
-                Выберите объект слева
+              <div style={emptyStateStyle}>
+                <strong style={{ fontSize: '1rem' }}>Выберите объект слева</strong>
               </div>
             ) : sections.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem 1rem', 
-                color: '#8e8e93',
-                fontSize: '0.9rem'
-              }}>
-                <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>📦</div>
-                Нет секций.<br/>Создайте первую секцию.
+              <div style={emptyStateStyle}>
+                <strong style={{ fontSize: '1rem' }}>Нет секций</strong>
+                <span>Создайте первую секцию.</span>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '70vh', overflowY: 'auto' }}>
+              <div style={listContainerStyle}>
                 {sections.map(section => (
                   <div
                     key={section.id}
@@ -455,7 +482,7 @@ export default function PlannerPageNew({ user }) {
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span>📄 Файлов: {section.active_files_count || 0}</span>
+                      <span>Файлов: {section.active_files_count || 0}</span>
                       {selectedSection?.id === section.id && (
                         <button
                           onClick={(e) => {
@@ -473,7 +500,7 @@ export default function PlannerPageNew({ user }) {
                             fontWeight: '600'
                           }}
                         >
-                          🗑️
+                          Удалить
                         </button>
                       )}
                     </div>
@@ -484,82 +511,88 @@ export default function PlannerPageNew({ user }) {
           </div>
 
           {/* КОЛОНКА 3: XML ФАЙЛЫ */}
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              paddingBottom: '1rem',
-              borderBottom: '2px solid #f0f0f0'
-            }}>
+          <div style={{ ...columnContainerStyle }}>
+            <div style={headerRowStyle}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                📄 XML Файлы
+                XML файлы
                 {xmlFiles.length > 0 && (
-                  <span style={{ 
-                    background: '#e5e5ea', 
-                    color: '#1c1c1e',
-                    borderRadius: '8px',
-                    padding: '0.15rem 0.5rem',
-                    fontSize: '0.85rem',
-                    fontWeight: '600'
-                  }}>
-                    {xmlFiles.length}
-                  </span>
+                  <span style={badgeStyle}>{xmlFiles.length}</span>
                 )}
               </h3>
-              {selectedSection && (
-                <label 
-                  className="btn btn-success btn-small"
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    borderRadius: '10px',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.6 : 1
-                  }}
-                >
-                  {loading ? '⏳ Загрузка...' : '📤 Загрузить XML'}
-                  <input
-                    type="file"
-                    accept=".xml"
-                    onChange={handleFileUpload}
-                    disabled={loading}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {selectedSection && (
+                  <>
+                    <button
+                      onClick={() => handleExportSection('full')}
+                      disabled={exporting !== null}
+                      style={{
+                        padding: '0.5rem 0.9rem',
+                        borderRadius: '10px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        border: 'none',
+                        background: '#007aff',
+                        color: '#fff',
+                        cursor: exporting ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {exporting === 'full' ? 'Экспорт...' : 'Выгрузить проект'}
+                    </button>
+                    <button
+                      onClick={() => handleExportSection('actual')}
+                      disabled={exporting !== null}
+                      style={{
+                        padding: '0.5rem 0.9rem',
+                        borderRadius: '10px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        border: 'none',
+                        background: '#30d158',
+                        color: '#fff',
+                        cursor: exporting ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {exporting === 'actual' ? 'Экспорт фактов...' : 'Выгрузить факты'}
+                    </button>
+                    <label 
+                      className="btn btn-success btn-small"
+                      style={{
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        borderRadius: '10px',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        opacity: loading ? 0.6 : 1
+                      }}
+                    >
+                      {loading ? 'Загрузка...' : 'Загрузить XML'}
+                      <input
+                        type="file"
+                        accept=".xml"
+                        onChange={handleFileUpload}
+                        disabled={loading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
             </div>
 
-            {!selectedSection ? (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '3rem 1rem', 
-                color: '#8e8e93',
-                fontSize: '0.9rem'
-              }}>
-                <div style={{ fontSize: '4rem', marginBottom: '0.5rem', opacity: 0.3 }}>👈</div>
-                Выберите секцию слева
-              </div>
-            ) : xmlFiles.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '3rem 1rem', 
-                color: '#8e8e93',
-                fontSize: '0.9rem'
-              }}>
-                <div style={{ fontSize: '4rem', marginBottom: '0.5rem', opacity: 0.3 }}>📄</div>
-                Нет файлов.<br/>Загрузите XML файл.
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              {!selectedSection ? (
+                <div style={emptyStateStyle}>
+                  <strong style={{ fontSize: '1rem' }}>Выберите секцию слева</strong>
+                </div>
+              ) : xmlFiles.length === 0 ? (
+                <div style={emptyStateStyle}>
+                  <strong style={{ fontSize: '1rem' }}>Нет файлов</strong>
+                  <span>Загрузите актуальный XML.</span>
+                </div>
+              ) : (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #e5e5ea' }}>
                       <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>№</th>
@@ -615,7 +648,7 @@ export default function PlannerPageNew({ user }) {
                                   fontWeight: '600'
                                 }}
                               >
-                                🔄 Заменить
+                                Заменить
                               </button>
                               <button
                                 onClick={() => handleDeleteFile(file.id)}
@@ -630,17 +663,19 @@ export default function PlannerPageNew({ user }) {
                                   fontWeight: '600'
                                 }}
                               >
-                                🗑️
+                                Удалить
                               </button>
                             </div>
                           )}
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -668,7 +703,7 @@ export default function PlannerPageNew({ user }) {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600' }}>
-              🏗️ Создать новый объект
+              Создать новый объект
             </h3>
             <div className="form-group">
               <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>Название объекта</label>
@@ -734,7 +769,7 @@ export default function PlannerPageNew({ user }) {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600' }}>
-              📦 Создать новую секцию
+              Создать новую секцию
             </h3>
             <div className="form-group" style={{ marginBottom: '1rem' }}>
               <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>Номер секции</label>
