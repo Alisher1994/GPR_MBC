@@ -11,7 +11,7 @@ import foremanRoutes from './routes/foreman-new.js';
 import subcontractorRoutes from './routes/subcontractor.js';
 
 // DB
-import createTables from './db/migrate.js';
+import recreateTables from './db/recreate.js';
 import pool from './db/pool.js';
 
 dotenv.config();
@@ -98,7 +98,7 @@ const startServer = async () => {
     }
 
     // Create tables if they don't exist
-    await createTables();
+    await recreateTables();
     console.log('✅ Database initialized');
 
     app.listen(PORT, () => {
