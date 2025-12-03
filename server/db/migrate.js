@@ -37,8 +37,23 @@ const createTables = async (retries = 5, delay = 3000) => {
       CREATE TABLE IF NOT EXISTS objects (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
+        created_by INTEGER REFERENCES users(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Таблица секций
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS sections (
+        id SERIAL PRIMARY KEY,
+        object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
+        section_number INTEGER NOT NULL,
+        section_name VARCHAR(255) NOT NULL,
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(object_id, section_number)
       )
     `);
 
@@ -46,11 +61,13 @@ const createTables = async (retries = 5, delay = 3000) => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS xml_files (
         id SERIAL PRIMARY KEY,
-        object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
+        section_id INTEGER REFERENCES sections(id) ON DELETE CASCADE,
         filename VARCHAR(255) NOT NULL,
         filepath VARCHAR(500) NOT NULL,
+        file_size INTEGER,
         uploaded_by INTEGER REFERENCES users(id),
-        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'replaced', 'deleted'))
       )
     `);
 
@@ -58,7 +75,7 @@ const createTables = async (retries = 5, delay = 3000) => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS work_items (
         id SERIAL PRIMARY KEY,
-        object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
+        section_id INTEGER REFERENCES sections(id) ON DELETE CASCADE,
         xml_file_id INTEGER REFERENCES xml_files(id) ON DELETE SET NULL,
         stage VARCHAR(255) NOT NULL,
         section VARCHAR(255) NOT NULL,
@@ -72,7 +89,7 @@ const createTables = async (retries = 5, delay = 3000) => {
         daily_target NUMERIC(12, 2),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(object_id, stage, section, floor, work_type)
+        UNIQUE(section_id, stage, section, floor, work_type)
       )
     `);
 

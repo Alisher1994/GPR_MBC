@@ -26,29 +26,49 @@ export const auth = {
 };
 
 export const planner = {
-  uploadXML: (formData) => api.post('/planner/upload', formData, {
+  // Объекты
+  getObjects: () => api.get('/planner/objects'),
+  createObject: (data) => api.post('/planner/objects', data),
+  deleteObject: (objectId) => api.delete(`/planner/objects/${objectId}`),
+  
+  // Секции
+  getObjectSections: (objectId) => api.get(`/planner/objects/${objectId}/sections`),
+  createSection: (objectId, data) => api.post(`/planner/objects/${objectId}/sections`, data),
+  deleteSection: (sectionId) => api.delete(`/planner/sections/${sectionId}`),
+  
+  // XML файлы
+  getSectionXmlFiles: (sectionId) => api.get(`/planner/sections/${sectionId}/xml-files`),
+  uploadSectionXml: (sectionId, formData) => api.post(`/planner/sections/${sectionId}/upload-xml`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  getObjects: () => api.get('/planner/objects'),
-  getObjectDetails: (objectId) => api.get(`/planner/objects/${objectId}`),
-  exportXML: (objectId) => api.get(`/planner/export/${objectId}`, {
+  deleteXmlFile: (fileId) => api.delete(`/planner/xml-files/${fileId}`),
+  
+  // Экспорт
+  exportSection: (sectionId) => api.get(`/planner/sections/${sectionId}/export`, {
     responseType: 'blob'
   }),
-  exportCompletedXML: (objectId) => api.get(`/planner/export-completed/${objectId}`, {
+  exportCompletedSection: (sectionId) => api.get(`/planner/sections/${sectionId}/export-completed`, {
     responseType: 'blob'
-  }),
-  deleteObject: (objectId) => api.delete(`/planner/objects/${objectId}`)
+  })
 };
 
 export const foreman = {
-  getUpcomingWorks: (objectId, weeks = 2) => 
-    api.get(`/foreman/upcoming-works/${objectId}`, { params: { weeks } }),
+  // Объекты и секции
+  getObjects: () => api.get('/foreman/objects'),
+  getObjectSections: (objectId) => api.get(`/foreman/objects/${objectId}/sections`),
+  getSectionWorks: (sectionId, weeks = 2) => 
+    api.get(`/foreman/sections/${sectionId}/works`, { params: { weeks } }),
+  checkSectionUpdates: (sectionId, lastChecked) => 
+    api.get(`/foreman/sections/${sectionId}/check-updates`, { params: { lastChecked } }),
+  
+  // Распределение работ
   assignWork: (workItemId, assignments, foremanId) =>
     api.post('/foreman/assign-work', { workItemId, assignments, foremanId }),
+  
+  // Подтверждения
   getPendingApprovals: (foremanId) => api.get(`/foreman/pending-approvals/${foremanId}`),
   approveWork: (completedWorkId, foremanId, status, adjustedVolume, notes) =>
     api.post('/foreman/approve-work', { completedWorkId, foremanId, status, adjustedVolume, notes }),
-  getMyAssignments: (foremanId) => api.get(`/foreman/my-assignments/${foremanId}`),
   getSentAssignments: (foremanId) => api.get(`/foreman/sent-assignments/${foremanId}`)
 };
 

@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 
 // Routes
 import authRoutes from './routes/auth.js';
-import plannerRoutes from './routes/planner.js';
-import foremanRoutes from './routes/foreman.js';
+import plannerRoutes from './routes/planner-new.js';
+import foremanRoutes from './routes/foreman-new.js';
 import subcontractorRoutes from './routes/subcontractor.js';
 
 // DB

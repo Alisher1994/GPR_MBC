@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import Login from './components/Login';
-import PlannerPage from './pages/PlannerPage';
+import PlannerPageNew from './pages/PlannerPageNew';
 import ForemanPage from './pages/ForemanPage';
 import SubcontractorPage from './pages/SubcontractorPage';
 
@@ -37,7 +37,7 @@ function App() {
   const renderRolePage = () => {
     switch (user.role) {
       case 'planner':
-        return <PlannerPage user={user} />;
+        return <PlannerPageNew user={user} />;
       case 'foreman':
         return <ForemanPage user={user} />;
       case 'subcontractor':
