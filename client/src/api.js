@@ -72,6 +72,7 @@ export const foreman = {
   
   // Подтверждения
   getPendingApprovals: (foremanId) => api.get(`/foreman/pending-approvals/${foremanId}`),
+  getRejectedWorks: (foremanId) => api.get(`/foreman/rejected-works/${foremanId}`),
   approveWork: (completedWorkId, foremanId, status, adjustedVolume, notes) =>
     api.post('/foreman/approve-work', { completedWorkId, foremanId, status, adjustedVolume, notes }),
   getSentAssignments: (foremanId) => api.get(`/foreman/sent-assignments/${foremanId}`)

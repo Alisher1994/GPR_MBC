@@ -202,7 +202,7 @@ router.get('/pending-approvals/:foremanId', async (req, res) => {
        JOIN sections s ON wi.section_id = s.id
        JOIN objects o ON s.object_id = o.id
        JOIN users u ON wa.subcontractor_id = u.id
-       WHERE wa.foreman_id = $1 AND cw.status = 'pending'
+      WHERE wa.foreman_id = $1 AND cw.status = 'submitted'
        ORDER BY cw.work_date DESC`,
       [foremanId]
     );
@@ -210,6 +210,40 @@ router.get('/pending-approvals/:foremanId', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Ошибка получения ожидающих подтверждения:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Получить отклоненные выполненные работы
+router.get('/rejected-works/:foremanId', async (req, res) => {
+  try {
+    const { foremanId } = req.params;
+
+    const result = await pool.query(
+      `SELECT 
+         cw.*,
+         wi.work_type,
+         wi.floor,
+         wi.unit,
+         u.username as subcontractor_name,
+         u.company_name,
+         wa.assigned_volume,
+         s.section_name,
+         o.name as object_name
+       FROM completed_works cw
+       JOIN work_assignments wa ON cw.assignment_id = wa.id
+       JOIN work_items wi ON wa.work_item_id = wi.id
+       JOIN sections s ON wi.section_id = s.id
+       JOIN objects o ON s.object_id = o.id
+       JOIN users u ON wa.subcontractor_id = u.id
+       WHERE wa.foreman_id = $1 AND cw.status = 'rejected'
+       ORDER BY cw.updated_at DESC`,
+      [foremanId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения отклоненных работ:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -263,39 +297,73 @@ router.post('/approve-work', async (req, res) => {
 
     await client.query('BEGIN');
 
-    // Обновляем статус работы
-    const volumeToUse = adjustedVolume !== undefined ? adjustedVolume : null;
-    
-    await client.query(
-      `UPDATE completed_works 
-       SET status = $1, 
-           approved_by = $2, 
-           approved_at = CURRENT_TIMESTAMP,
-           adjusted_volume = $3,
-           notes = $4
-       WHERE id = $5`,
-      [status, foremanId, volumeToUse, notes, completedWorkId]
+    const workInfoResult = await client.query(
+      `SELECT 
+         cw.completed_volume,
+         wa.id as assignment_id,
+         wa.work_item_id,
+         wa.assigned_volume,
+         wa.status as assignment_status
+       FROM completed_works cw
+       JOIN work_assignments wa ON cw.assignment_id = wa.id
+       WHERE cw.id = $1`,
+      [completedWorkId]
     );
 
-    // Если одобрено, обновляем completed_volume в work_items
+    if (workInfoResult.rows.length === 0) {
+      throw new Error('Запись о выполненной работе не найдена');
+    }
+
+    const workInfo = workInfoResult.rows[0];
+    const volumeToApply = adjustedVolume !== undefined && adjustedVolume !== null
+      ? parseFloat(adjustedVolume)
+      : parseFloat(workInfo.completed_volume);
+
+    await client.query(
+      `UPDATE completed_works 
+       SET status = $1,
+           verified_by = $2,
+           notes = $3,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4`,
+      [status, foremanId, notes || null, completedWorkId]
+    );
+
     if (status === 'approved') {
-      const workInfo = await client.query(
-        `SELECT wa.work_item_id, cw.completed_volume, cw.adjusted_volume
-         FROM completed_works cw
-         JOIN work_assignments wa ON cw.assignment_id = wa.id
-         WHERE cw.id = $1`,
-        [completedWorkId]
+      await client.query(
+        'UPDATE work_items SET completed_volume = completed_volume + $1 WHERE id = $2',
+        [volumeToApply, workInfo.work_item_id]
       );
+    }
 
-      if (workInfo.rows.length > 0) {
-        const { work_item_id, completed_volume, adjusted_volume } = workInfo.rows[0];
-        const volumeToAdd = adjusted_volume !== null ? adjusted_volume : completed_volume;
+    // Обновляем статус назначения в зависимости от прогресса
+    const approvedVolumeResult = await client.query(
+      `SELECT COALESCE(SUM(completed_volume), 0) as total
+       FROM completed_works
+       WHERE assignment_id = $1 AND status = 'approved'`,
+      [workInfo.assignment_id]
+    );
 
-        await client.query(
-          'UPDATE work_items SET completed_volume = completed_volume + $1 WHERE id = $2',
-          [volumeToAdd, work_item_id]
-        );
-      }
+    const approvedVolume = parseFloat(approvedVolumeResult.rows[0].total);
+    let newAssignmentStatus = workInfo.assignment_status;
+
+    if (status === 'approved') {
+      newAssignmentStatus = approvedVolume >= parseFloat(workInfo.assigned_volume)
+        ? 'completed'
+        : 'in_progress';
+    }
+
+    if (status === 'rejected' && approvedVolume === 0) {
+      newAssignmentStatus = 'assigned';
+    }
+
+    if (newAssignmentStatus !== workInfo.assignment_status) {
+      await client.query(
+        `UPDATE work_assignments 
+         SET status = $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2`,
+        [newAssignmentStatus, workInfo.assignment_id]
+      );
     }
 
     await client.query('COMMIT');

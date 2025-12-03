@@ -10,6 +10,7 @@ export default function ForemanPageNew({ user }) {
   const [works, setWorks] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [sentAssignments, setSentAssignments] = useState([]);
+  const [rejectedWorks, setRejectedWorks] = useState([]);
   const [subcontractors, setSubcontractors] = useState([]);
   const [activeTab, setActiveTab] = useState('works');
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function ForemanPageNew({ user }) {
     loadSubcontractors();
     loadPendingApprovals();
     loadSentAssignments();
+    loadRejectedWorks();
   }, []);
 
   useEffect(() => {
@@ -110,6 +112,15 @@ export default function ForemanPageNew({ user }) {
     }
   };
 
+  const loadRejectedWorks = async () => {
+    try {
+      const response = await foreman.getRejectedWorks(user.id);
+      setRejectedWorks(response.data);
+    } catch (error) {
+      console.error('Ошибка загрузки отклоненных работ:', error);
+    }
+  };
+
   const toggleSection = (sectionName) => {
     setExpandedSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
   };
@@ -178,6 +189,8 @@ export default function ForemanPageNew({ user }) {
       );
       alert(approve ? 'Работа одобрена!' : 'Работа отклонена');
       loadPendingApprovals();
+      loadSentAssignments();
+      loadRejectedWorks();
     } catch (error) {
       alert('Ошибка: ' + (error.response?.data?.error || error.message));
     }
@@ -436,6 +449,7 @@ export default function ForemanPageNew({ user }) {
           <KanbanBoard
             pendingApprovals={pendingApprovals}
             sentAssignments={sentAssignments}
+            rejectedWorks={rejectedWorks}
             onApprove={(id) => handleApproveWork(id, true)}
             onReject={(id) => handleApproveWork(id, false)}
           />

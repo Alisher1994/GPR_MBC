@@ -233,7 +233,7 @@ const createTables = async (retries = 5, delay = 3000) => {
             notes TEXT,
             submitted_by INTEGER REFERENCES users(id),
             verified_by INTEGER REFERENCES users(id),
-            status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'submitted', 'approved', 'rejected')),
+            status VARCHAR(50) DEFAULT 'submitted' CHECK (status IN ('submitted', 'approved', 'rejected')),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           )
