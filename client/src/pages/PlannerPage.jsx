@@ -58,6 +58,21 @@ export default function PlannerPage({ user }) {
     }
   };
 
+  const handleExportCompleted = async (objectId) => {
+    try {
+      const response = await planner.exportCompletedXML(objectId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `completed-${objectId}-${Date.now()}.xml`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert('Ошибка экспорта выполненных работ: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
   const viewObjectDetails = async (objectId) => {
     try {
       const response = await planner.getObjectDetails(objectId);
@@ -155,12 +170,21 @@ export default function PlannerPage({ user }) {
                         Детали
                       </button>
                       <button
-                        className="btn btn-small btn-success"
+                        className="btn btn-small btn-primary"
                         onClick={() => handleExport(obj.id)}
-                        title="Скачать актуальную версию XML с выполненными объемами"
+                        title="Скачать полный XML проекта"
                       >
-                        📥 Скачать XML
+                        📥 Весь проект
                       </button>
+                      {obj.has_updates && (
+                        <button
+                          className="btn btn-small btn-success"
+                          onClick={() => handleExportCompleted(obj.id)}
+                          title="Скачать только выполненные объемы работ"
+                        >
+                          ✅ Выполнения
+                        </button>
+                      )}
                       <button
                         className="btn btn-small btn-danger"
                         onClick={() => handleDeleteObject(obj.id, obj.name)}

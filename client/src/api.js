@@ -34,6 +34,9 @@ export const planner = {
   exportXML: (objectId) => api.get(`/planner/export/${objectId}`, {
     responseType: 'blob'
   }),
+  exportCompletedXML: (objectId) => api.get(`/planner/export-completed/${objectId}`, {
+    responseType: 'blob'
+  }),
   deleteObject: (objectId) => api.delete(`/planner/objects/${objectId}`)
 };
 

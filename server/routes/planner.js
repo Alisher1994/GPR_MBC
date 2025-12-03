@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import pool from '../db/pool.js';
-import { parseXMLFile, generateXMLFromData } from '../utils/xmlParser.js';
+import { parseXMLFile, generateXMLFromData, generateCompletedWorksXML } from '../utils/xmlParser.js';
 import fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -206,6 +206,44 @@ router.get('/export/:objectId', async (req, res) => {
 
   } catch (error) {
     console.error('Ошибка экспорта XML:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Экспорт только выполненных работ в XML
+router.get('/export-completed/:objectId', async (req, res) => {
+  try {
+    const { objectId } = req.params;
+
+    const objectResult = await pool.query(
+      'SELECT name FROM objects WHERE id = $1',
+      [objectId]
+    );
+
+    if (objectResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Объект не найден' });
+    }
+
+    const workItemsResult = await pool.query(
+      'SELECT * FROM work_items WHERE object_id = $1 AND completed_volume > 0 ORDER BY stage, block, floor',
+      [objectId]
+    );
+
+    if (workItemsResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Нет выполненных работ для экспорта' });
+    }
+
+    const xmlContent = await generateCompletedWorksXML(
+      objectResult.rows[0].name,
+      workItemsResult.rows
+    );
+
+    res.header('Content-Type', 'application/xml');
+    res.header('Content-Disposition', `attachment; filename="completed-${objectId}-${Date.now()}.xml"`);
+    res.send(xmlContent);
+
+  } catch (error) {
+    console.error('Ошибка экспорта выполненных работ:', error);
     res.status(500).json({ error: error.message });
   }
 });
