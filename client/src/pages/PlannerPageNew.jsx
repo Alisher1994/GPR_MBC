@@ -8,6 +8,7 @@ export default function PlannerPageNew({ user }) {
   const [selectedSection, setSelectedSection] = useState(null);
   const [xmlFiles, setXmlFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Модальные окна
   const [showObjectModal, setShowObjectModal] = useState(false);
@@ -23,29 +24,35 @@ export default function PlannerPageNew({ user }) {
   useEffect(() => {
     if (selectedObject) {
       loadSections(selectedObject.id);
+    } else {
+      setSections([]);
+      setSelectedSection(null);
     }
   }, [selectedObject]);
 
   useEffect(() => {
     if (selectedSection) {
       loadXmlFiles(selectedSection.id);
+    } else {
+      setXmlFiles([]);
     }
   }, [selectedSection]);
 
   const loadObjects = async () => {
     try {
+      setError(null);
       const response = await planner.getObjects();
-      setObjects(response.data);
+      setObjects(response.data || []);
     } catch (error) {
       console.error('Ошибка загрузки объектов:', error);
-      alert('Ошибка загрузки объектов');
+      setError('Не удалось загрузить объекты. Проверьте подключение к серверу.');
     }
   };
 
   const loadSections = async (objectId) => {
     try {
       const response = await planner.getObjectSections(objectId);
-      setSections(response.data);
+      setSections(response.data || []);
     } catch (error) {
       console.error('Ошибка загрузки секций:', error);
       alert('Ошибка загрузки секций');
@@ -55,7 +62,7 @@ export default function PlannerPageNew({ user }) {
   const loadXmlFiles = async (sectionId) => {
     try {
       const response = await planner.getSectionXmlFiles(sectionId);
-      setXmlFiles(response.data);
+      setXmlFiles(response.data || []);
     } catch (error) {
       console.error('Ошибка загрузки файлов:', error);
       alert('Ошибка загрузки файлов');
@@ -69,13 +76,13 @@ export default function PlannerPageNew({ user }) {
     }
 
     try {
-      await planner.createObject({ name: newObjectName, userId: user.id });
+      await planner.createObject({ name: newObjectName.trim(), userId: user.id });
       setNewObjectName('');
       setShowObjectModal(false);
       loadObjects();
     } catch (error) {
       console.error('Ошибка создания объекта:', error);
-      alert('Ошибка создания объекта');
+      alert(error.response?.data?.error || 'Ошибка создания объекта');
     }
   };
 
@@ -88,7 +95,7 @@ export default function PlannerPageNew({ user }) {
     try {
       await planner.createSection(selectedObject.id, {
         sectionNumber: parseInt(newSectionNumber),
-        sectionName: newSectionName,
+        sectionName: newSectionName.trim(),
         userId: user.id
       });
       setNewSectionNumber('');
@@ -101,43 +108,33 @@ export default function PlannerPageNew({ user }) {
     }
   };
 
-  const handleUploadXml = async (sectionId, file) => {
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', user.id);
+
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('xmlFile', file);
-      formData.append('userId', user.id);
-
-      await planner.uploadSectionXml(sectionId, formData);
-      alert('XML файл успешно загружен!');
-      loadXmlFiles(sectionId);
+      await planner.uploadSectionXml(selectedSection.id, formData);
+      loadXmlFiles(selectedSection.id);
+      e.target.value = '';
     } catch (error) {
-      console.error('Ошибка загрузки XML:', error);
-      alert(error.response?.data?.error || 'Ошибка загрузки XML');
+      console.error('Ошибка загрузки файла:', error);
+      alert(error.response?.data?.error || 'Ошибка загрузки файла');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteXmlFile = async (fileId) => {
-    if (!confirm('Удалить этот XML файл?')) return;
-
-    try {
-      await planner.deleteXmlFile(fileId);
-      loadXmlFiles(selectedSection.id);
-    } catch (error) {
-      console.error('Ошибка удаления файла:', error);
-      alert('Ошибка удаления файла');
-    }
-  };
-
   const handleDeleteObject = async (objectId) => {
-    if (!confirm('Удалить объект со всеми секциями и файлами?')) return;
+    if (!confirm('Удалить объект и все его секции?')) return;
 
     try {
       await planner.deleteObject(objectId);
       setSelectedObject(null);
-      setSelectedSection(null);
       loadObjects();
     } catch (error) {
       console.error('Ошибка удаления объекта:', error);
@@ -146,7 +143,7 @@ export default function PlannerPageNew({ user }) {
   };
 
   const handleDeleteSection = async (sectionId) => {
-    if (!confirm('Удалить секцию со всеми файлами?')) return;
+    if (!confirm('Удалить секцию и все её файлы?')) return;
 
     try {
       await planner.deleteSection(sectionId);
@@ -158,216 +155,484 @@ export default function PlannerPageNew({ user }) {
     }
   };
 
+  const handleReplaceFile = async (fileId) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.xml';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userId', user.id);
+
+      setLoading(true);
+      try {
+        await planner.uploadSectionXml(selectedSection.id, formData);
+        loadXmlFiles(selectedSection.id);
+      } catch (error) {
+        alert('Ошибка замены файла');
+      } finally {
+        setLoading(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    if (!confirm('Удалить файл?')) return;
+
+    try {
+      await planner.deleteSectionXmlFile(fileId);
+      loadXmlFiles(selectedSection.id);
+    } catch (error) {
+      alert('Ошибка удаления файла');
+    }
+  };
+
   const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
     if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleString('ru-RU');
+    return date.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-      <h2 style={{ marginBottom: '2rem' }}>Панель плановика</h2>
+    <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: '#1c1c1e' }}>
+          📋 Панель плановика
+        </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 300px 1fr', gap: '1.5rem', minHeight: '600px' }}>
-        
-        {/* Колонка 1: Объекты */}
-        <div className="card" style={{ height: 'fit-content' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>🏗️ Объекты</h3>
-            <button 
-              className="btn btn-primary btn-small"
-              onClick={() => setShowObjectModal(true)}
-            >
-              + Добавить
-            </button>
+        {error && (
+          <div style={{
+            background: '#ff3b30',
+            color: '#fff',
+            padding: '1rem',
+            borderRadius: '12px',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+            <span>{error}</span>
           </div>
+        )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {objects.map(obj => (
-              <div
-                key={obj.id}
-                onClick={() => {
-                  setSelectedObject(obj);
-                  setSelectedSection(null);
-                }}
-                style={{
-                  padding: '1rem',
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '320px 320px 1fr', 
+          gap: '1.5rem',
+          alignItems: 'start'
+        }}>
+          
+          {/* КОЛОНКА 1: ОБЪЕКТЫ */}
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            position: 'sticky',
+            top: '1.5rem'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '1.25rem',
+              paddingBottom: '1rem',
+              borderBottom: '2px solid #f0f0f0'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🏗️ Объекты
+                <span style={{ 
+                  background: '#e5e5ea', 
+                  color: '#1c1c1e',
                   borderRadius: '8px',
-                  cursor: 'pointer',
-                  background: selectedObject?.id === obj.id ? '#007aff' : '#f5f5f5',
-                  color: selectedObject?.id === obj.id ? '#fff' : '#000',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{obj.name}</div>
-                <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
-                  Секций: {obj.sections_count || 0}
-                </div>
-                {selectedObject?.id === obj.id && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteObject(obj.id);
-                    }}
-                    style={{
-                      marginTop: '0.5rem',
-                      padding: '0.25rem 0.5rem',
-                      fontSize: '0.75rem',
-                      background: 'rgba(255,59,48,0.2)',
-                      border: 'none',
-                      borderRadius: '4px',
-                      color: '#fff',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    🗑️ Удалить объект
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Колонка 2: Секции */}
-        <div className="card" style={{ height: 'fit-content' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>📦 Секции</h3>
-            {selectedObject && (
+                  padding: '0.15rem 0.5rem',
+                  fontSize: '0.85rem',
+                  fontWeight: '600'
+                }}>
+                  {objects.length}
+                </span>
+              </h3>
               <button 
                 className="btn btn-primary btn-small"
-                onClick={() => setShowSectionModal(true)}
+                onClick={() => setShowObjectModal(true)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  borderRadius: '10px'
+                }}
               >
                 + Добавить
               </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '70vh', overflowY: 'auto' }}>
+              {objects.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '2rem 1rem', 
+                  color: '#8e8e93',
+                  fontSize: '0.9rem'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>🏗️</div>
+                  Нет объектов.<br/>Создайте первый объект.
+                </div>
+              ) : (
+                objects.map(obj => (
+                  <div
+                    key={obj.id}
+                    onClick={() => setSelectedObject(obj)}
+                    style={{
+                      padding: '1rem',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      background: selectedObject?.id === obj.id 
+                        ? 'linear-gradient(135deg, #007aff, #5ac8fa)' 
+                        : '#f9f9f9',
+                      color: selectedObject?.id === obj.id ? '#fff' : '#1c1c1e',
+                      transition: 'all 0.2s ease',
+                      border: selectedObject?.id === obj.id ? '2px solid #007aff' : '2px solid transparent',
+                      boxShadow: selectedObject?.id === obj.id 
+                        ? '0 4px 12px rgba(0,122,255,0.3)' 
+                        : '0 2px 4px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                      {obj.name}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.85rem', 
+                      opacity: 0.9,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span>📦 Секций: {obj.sections_count || 0}</span>
+                      {selectedObject?.id === obj.id && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteObject(obj.id);
+                          }}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            fontSize: '0.75rem',
+                            background: 'rgba(255,255,255,0.2)',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* КОЛОНКА 2: СЕКЦИИ */}
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            position: 'sticky',
+            top: '1.5rem'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '1.25rem',
+              paddingBottom: '1rem',
+              borderBottom: '2px solid #f0f0f0'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                📦 Секции
+                {sections.length > 0 && (
+                  <span style={{ 
+                    background: '#e5e5ea', 
+                    color: '#1c1c1e',
+                    borderRadius: '8px',
+                    padding: '0.15rem 0.5rem',
+                    fontSize: '0.85rem',
+                    fontWeight: '600'
+                  }}>
+                    {sections.length}
+                  </span>
+                )}
+              </h3>
+              {selectedObject && (
+                <button 
+                  className="btn btn-primary btn-small"
+                  onClick={() => setShowSectionModal(true)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    borderRadius: '10px'
+                  }}
+                >
+                  + Добавить
+                </button>
+              )}
+            </div>
+
+            {!selectedObject ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2rem 1rem', 
+                color: '#8e8e93',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>👈</div>
+                Выберите объект слева
+              </div>
+            ) : sections.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2rem 1rem', 
+                color: '#8e8e93',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '0.5rem', opacity: 0.3 }}>📦</div>
+                Нет секций.<br/>Создайте первую секцию.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                {sections.map(section => (
+                  <div
+                    key={section.id}
+                    onClick={() => setSelectedSection(section)}
+                    style={{
+                      padding: '1rem',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      background: selectedSection?.id === section.id 
+                        ? 'linear-gradient(135deg, #34c759, #30d158)' 
+                        : '#f9f9f9',
+                      color: selectedSection?.id === section.id ? '#fff' : '#1c1c1e',
+                      transition: 'all 0.2s ease',
+                      border: selectedSection?.id === section.id ? '2px solid #34c759' : '2px solid transparent',
+                      boxShadow: selectedSection?.id === section.id 
+                        ? '0 4px 12px rgba(52,199,89,0.3)' 
+                        : '0 2px 4px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                      Секция {section.section_number}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>
+                      {section.section_name}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.85rem', 
+                      opacity: 0.9,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span>📄 Файлов: {section.active_files_count || 0}</span>
+                      {selectedSection?.id === section.id && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSection(section.id);
+                          }}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            fontSize: '0.75rem',
+                            background: 'rgba(255,255,255,0.2)',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
-          {!selectedObject ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
-              ← Выберите объект
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {sections.map(section => (
-                <div
-                  key={section.id}
-                  onClick={() => setSelectedSection(section)}
-                  style={{
-                    padding: '1rem',
+          {/* КОЛОНКА 3: XML ФАЙЛЫ */}
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '1.25rem',
+              paddingBottom: '1rem',
+              borderBottom: '2px solid #f0f0f0'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                📄 XML Файлы
+                {xmlFiles.length > 0 && (
+                  <span style={{ 
+                    background: '#e5e5ea', 
+                    color: '#1c1c1e',
                     borderRadius: '8px',
-                    cursor: 'pointer',
-                    background: selectedSection?.id === section.id ? '#34c759' : '#f5f5f5',
-                    color: selectedSection?.id === section.id ? '#fff' : '#000',
-                    transition: 'all 0.2s'
+                    padding: '0.15rem 0.5rem',
+                    fontSize: '0.85rem',
+                    fontWeight: '600'
+                  }}>
+                    {xmlFiles.length}
+                  </span>
+                )}
+              </h3>
+              {selectedSection && (
+                <label 
+                  className="btn btn-success btn-small"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    borderRadius: '10px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1
                   }}
                 >
-                  <div style={{ fontWeight: '600' }}>Секция {section.section_number}</div>
-                  <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{section.section_name}</div>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>
-                    Файлов: {section.active_files_count || 0}
-                  </div>
-                  {selectedSection?.id === section.id && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSection(section.id);
-                      }}
-                      style={{
-                        marginTop: '0.5rem',
-                        padding: '0.25rem 0.5rem',
-                        fontSize: '0.75rem',
-                        background: 'rgba(255,59,48,0.3)',
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      🗑️ Удалить секцию
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Колонка 3: XML Файлы */}
-        <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📄 XML Файлы</h3>
-
-          {!selectedSection ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#8e8e93' }}>
-              ← Выберите секцию
-            </div>
-          ) : (
-            <>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label className="btn btn-success" style={{ cursor: 'pointer', display: 'inline-block' }}>
-                  📤 Загрузить новый XML
+                  {loading ? '⏳ Загрузка...' : '📤 Загрузить XML'}
                   <input
                     type="file"
                     accept=".xml"
+                    onChange={handleFileUpload}
+                    disabled={loading}
                     style={{ display: 'none' }}
-                    onChange={(e) => {
-                      if (e.target.files[0]) {
-                        handleUploadXml(selectedSection.id, e.target.files[0]);
-                      }
-                    }}
                   />
                 </label>
+              )}
+            </div>
+
+            {!selectedSection ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '3rem 1rem', 
+                color: '#8e8e93',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontSize: '4rem', marginBottom: '0.5rem', opacity: 0.3 }}>👈</div>
+                Выберите секцию слева
               </div>
-
-              {loading && <p className="loading">Загрузка файла...</p>}
-
+            ) : xmlFiles.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '3rem 1rem', 
+                color: '#8e8e93',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontSize: '4rem', marginBottom: '0.5rem', opacity: 0.3 }}>📄</div>
+                Нет файлов.<br/>Загрузите XML файл.
+              </div>
+            ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="table">
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr>
-                      <th>№</th>
-                      <th>Дата/Время</th>
-                      <th>Название файла</th>
-                      <th>Размер</th>
-                      <th>Загрузил</th>
-                      <th>Статус</th>
-                      <th>Действия</th>
+                    <tr style={{ borderBottom: '2px solid #e5e5ea' }}>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>№</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Дата / Время</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Название файла</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Размер</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Кем добавлен</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Статус</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Действия</th>
                     </tr>
                   </thead>
                   <tbody>
                     {xmlFiles.map((file, index) => (
-                      <tr key={file.id} style={{ opacity: file.status === 'active' ? 1 : 0.5 }}>
-                        <td>{index + 1}</td>
-                        <td>{formatDateTime(file.uploaded_at)}</td>
-                        <td>{file.filename}</td>
-                        <td>{formatFileSize(file.file_size)}</td>
-                        <td>{file.uploaded_by_name}</td>
-                        <td>
+                      <tr 
+                        key={file.id} 
+                        style={{ 
+                          borderBottom: '1px solid #f0f0f0',
+                          background: file.status === 'active' ? 'rgba(52,199,89,0.05)' : 'transparent'
+                        }}
+                      >
+                        <td style={{ padding: '0.75rem', fontSize: '0.9rem' }}>{index + 1}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{formatDateTime(file.uploaded_at)}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: '500' }}>{file.filename}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#8e8e93' }}>{formatFileSize(file.file_size)}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{file.uploaded_by_name || '-'}</td>
+                        <td style={{ padding: '0.75rem' }}>
                           <span style={{
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.85rem',
-                            background: file.status === 'active' ? '#d1e7dd' : 
-                                       file.status === 'replaced' ? '#fff3cd' : '#f8d7da',
-                            color: file.status === 'active' ? '#0f5132' : 
-                                   file.status === 'replaced' ? '#856404' : '#842029'
+                            padding: '0.25rem 0.6rem',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            background: file.status === 'active' ? '#34c759' : 
+                                       file.status === 'replaced' ? '#ff9500' : '#ff3b30',
+                            color: '#fff'
                           }}>
-                            {file.status === 'active' ? '✓ Активный' : 
-                             file.status === 'replaced' ? '⟲ Заменен' : '✗ Удален'}
+                            {file.status === 'active' ? '✓ Активен' : 
+                             file.status === 'replaced' ? 'Заменён' : 'Удалён'}
                           </span>
                         </td>
-                        <td>
+                        <td style={{ padding: '0.75rem' }}>
                           {file.status === 'active' && (
-                            <button
-                              className="btn btn-small btn-danger"
-                              onClick={() => handleDeleteXmlFile(file.id)}
-                            >
-                              Удалить
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                onClick={() => handleReplaceFile(file.id)}
+                                style={{
+                                  padding: '0.4rem 0.75rem',
+                                  fontSize: '0.8rem',
+                                  background: '#007aff',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: '600'
+                                }}
+                              >
+                                🔄 Заменить
+                              </button>
+                              <button
+                                onClick={() => handleDeleteFile(file.id)}
+                                style={{
+                                  padding: '0.4rem 0.75rem',
+                                  fontSize: '0.8rem',
+                                  background: '#ff3b30',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: '600'
+                                }}
+                              >
+                                🗑️
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -375,66 +640,155 @@ export default function PlannerPageNew({ user }) {
                   </tbody>
                 </table>
               </div>
-
-              {xmlFiles.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
-                  Нет загруженных файлов
-                </div>
-              )}
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Модалка создания объекта */}
+      {/* Модальное окно: Создание объекта */}
       {showObjectModal && (
-        <div className="modal-overlay" onClick={() => setShowObjectModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3>Создать новый объект</h3>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '2rem',
+            width: '90%',
+            maxWidth: '500px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600' }}>
+              🏗️ Создать новый объект
+            </h3>
             <div className="form-group">
-              <label>Название объекта</label>
+              <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>Название объекта</label>
               <input
                 type="text"
                 value={newObjectName}
                 onChange={(e) => setNewObjectName(e.target.value)}
-                placeholder="Например: ЖК Новая Москва"
+                placeholder="Например: ЖК Восход"
+                autoFocus
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e5ea',
+                  fontSize: '1rem'
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && handleCreateObject()}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-              <button className="btn btn-primary" onClick={handleCreateObject}>Создать</button>
-              <button className="btn btn-secondary" onClick={() => setShowObjectModal(false)}>Отмена</button>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleCreateObject}
+                style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '600', borderRadius: '10px' }}
+              >
+                ✓ Создать
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setShowObjectModal(false);
+                  setNewObjectName('');
+                }}
+                style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '600', borderRadius: '10px' }}
+              >
+                ✗ Отмена
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Модалка создания секции */}
+      {/* Модальное окно: Создание секции */}
       {showSectionModal && (
-        <div className="modal-overlay" onClick={() => setShowSectionModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3>Создать новую секцию</h3>
-            <div className="form-group">
-              <label>Номер секции</label>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '2rem',
+            width: '90%',
+            maxWidth: '500px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600' }}>
+              📦 Создать новую секцию
+            </h3>
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>Номер секции</label>
               <input
                 type="number"
                 value={newSectionNumber}
                 onChange={(e) => setNewSectionNumber(e.target.value)}
                 placeholder="1"
                 min="1"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e5ea',
+                  fontSize: '1rem'
+                }}
               />
             </div>
             <div className="form-group">
-              <label>Название секции</label>
+              <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>Название секции</label>
               <input
                 type="text"
                 value={newSectionName}
                 onChange={(e) => setNewSectionName(e.target.value)}
-                placeholder="Например: Секция 1"
+                placeholder="Например: Секция №1"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e5e5ea',
+                  fontSize: '1rem'
+                }}
+                onKeyPress={(e) => e.key === 'Enter' && handleCreateSection()}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-              <button className="btn btn-primary" onClick={handleCreateSection}>Создать</button>
-              <button className="btn btn-secondary" onClick={() => setShowSectionModal(false)}>Отмена</button>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleCreateSection}
+                style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '600', borderRadius: '10px' }}
+              >
+                ✓ Создать
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setShowSectionModal(false);
+                  setNewSectionNumber('');
+                  setNewSectionName('');
+                }}
+                style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '600', borderRadius: '10px' }}
+              >
+                ✗ Отмена
+              </button>
             </div>
           </div>
         </div>
