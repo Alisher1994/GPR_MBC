@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { foreman, planner, auth } from '../api';
+import KanbanBoard from '../components/KanbanBoard';
 
 export default function ForemanPage({ user }) {
   const [objects, setObjects] = useState([]);
@@ -280,120 +281,14 @@ export default function ForemanPage({ user }) {
           </>
         )}
 
-        {/* Вкладка "Входящие" */}
-        {activeTab === 'incoming' && (
-          <>
-            <h3 className="mb-2">Выполненные объемы для проверки</h3>
-            {pendingApprovals.length === 0 ? (
-              <div className="empty-state">
-                <h3>Нет ожидающих подтверждения работ</h3>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Субподрядчик</th>
-                      <th>Работа</th>
-                      <th>Блок/Этаж</th>
-                      <th>Дата</th>
-                      <th>Выполнено</th>
-                      <th>Примечания</th>
-                      <th>Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pendingApprovals.map((approval) => (
-                      <tr key={approval.id}>
-                        <td>
-                          {approval.subcontractor_name}
-                          {approval.company_name && <><br/><small>{approval.company_name}</small></>}
-                        </td>
-                        <td>{approval.work_type}</td>
-                        <td>{approval.block} / {approval.floor}</td>
-                        <td>{new Date(approval.work_date).toLocaleDateString('ru-RU')}</td>
-                        <td>{approval.completed_volume} {approval.unit}</td>
-                        <td>{approval.notes || '-'}</td>
-                        <td>
-                          <div className="flex gap-1">
-                            <button
-                              className="btn btn-small btn-success"
-                              onClick={() => handleApproveWork(approval.id, true)}
-                            >
-                              ✓ Подтвердить
-                            </button>
-                            <button
-                              className="btn btn-small btn-danger"
-                              onClick={() => handleApproveWork(approval.id, false)}
-                            >
-                              ✗ Отклонить
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Вкладка "Отправленные" */}
-        {activeTab === 'sent' && (
-          <>
-            <h3 className="mb-2">Отправленные наряды</h3>
-            {sentAssignments.length === 0 ? (
-              <div className="empty-state">
-                <h3>Нет отправленных нарядов</h3>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Субподрядчик</th>
-                      <th>Работа</th>
-                      <th>Блок/Этаж</th>
-                      <th>Дата назначения</th>
-                      <th>Назначено</th>
-                      <th>Выполнено</th>
-                      <th>Статус</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sentAssignments.map((assignment) => (
-                      <tr key={assignment.id}>
-                        <td>
-                          {assignment.subcontractor_name}
-                          {assignment.company_name && <><br/><small>{assignment.company_name}</small></>}
-                        </td>
-                        <td>{assignment.work_type}</td>
-                        <td>{assignment.block} / {assignment.floor}</td>
-                        <td>{new Date(assignment.assigned_at).toLocaleDateString('ru-RU')}</td>
-                        <td>{assignment.assigned_volume} {assignment.unit}</td>
-                        <td>{assignment.completed_volume || 0} {assignment.unit}</td>
-                        <td>
-                          <span style={{
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.85rem',
-                            background: assignment.status === 'pending' ? '#fff3cd' : 
-                                       assignment.status === 'in_progress' ? '#cfe2ff' : '#d1e7dd',
-                            color: assignment.status === 'pending' ? '#856404' : 
-                                  assignment.status === 'in_progress' ? '#084298' : '#0f5132'
-                          }}>
-                            {assignment.status === 'pending' ? 'Ожидает' : 
-                             assignment.status === 'in_progress' ? 'В работе' : 'Завершено'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
+        {/* Канбан доска для входящих и отправленных */}
+        {(activeTab === 'incoming' || activeTab === 'sent') && (
+          <KanbanBoard
+            pendingApprovals={pendingApprovals}
+            sentAssignments={sentAssignments}
+            onApprove={(id) => handleApproveWork(id, true)}
+            onReject={(id) => handleApproveWork(id, false)}
+          />
         )}
       </div>
 
