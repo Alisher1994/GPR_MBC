@@ -57,13 +57,21 @@ router.post('/assign-work', async (req, res) => {
     }
 
     const { total_volume, completed_volume } = workResult.rows[0];
-    const remainingVolume = total_volume - completed_volume;
+    
+    // Проверяем уже назначенный объем
+    const assignedResult = await client.query(
+      'SELECT COALESCE(SUM(assigned_volume), 0) as total_assigned FROM work_assignments WHERE work_item_id = $1',
+      [workItemId]
+    );
+    
+    const alreadyAssigned = parseFloat(assignedResult.rows[0].total_assigned);
+    const remainingVolume = total_volume - completed_volume - alreadyAssigned;
 
     // Проверяем общий объем назначений
     const totalAssigned = assignments.reduce((sum, a) => sum + parseFloat(a.assignedVolume), 0);
     
     if (totalAssigned > remainingVolume) {
-      throw new Error(`Превышен доступный объем. Осталось: ${remainingVolume}, назначено: ${totalAssigned}`);
+      throw new Error(`Превышен доступный объем. Всего: ${total_volume}, выполнено: ${completed_volume}, уже назначено: ${alreadyAssigned}, осталось: ${remainingVolume}, пытаетесь назначить: ${totalAssigned}`);
     }
 
     // Создаем назначения
