@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { subcontractor } from '../api';
+import VolumeSlider from '../components/VolumeSlider';
 
 export default function SubcontractorPage({ user }) {
   const [assignments, setAssignments] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [activeTab, setActiveTab] = useState('assignments'); // 'assignments', 'history'
   const [loading, setLoading] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
 
   useEffect(() => {
     loadAssignments();
@@ -33,28 +35,19 @@ export default function SubcontractorPage({ user }) {
     }
   };
 
-  const handleSubmitWork = async (assignmentId, assignedVolume) => {
-    const completedVolume = prompt(`Введите выполненный объем (назначено: ${assignedVolume}):`);
-    if (!completedVolume) return;
-
-    const volume = parseFloat(completedVolume);
-    if (isNaN(volume) || volume <= 0) {
-      alert('Введите корректное значение');
-      return;
-    }
-
-    const notes = prompt('Примечания (опционально):');
+  const handleSubmitWork = async (volume) => {
     const workDate = new Date().toISOString().split('T')[0];
 
     try {
       await subcontractor.submitWork(
-        assignmentId,
+        selectedAssignment.id,
         volume,
         workDate,
-        notes,
+        null,
         user.id
       );
       alert('Выполненный объем отправлен на проверку!');
+      setSelectedAssignment(null);
       loadAssignments();
       loadStatistics();
     } catch (error) {
@@ -159,9 +152,9 @@ export default function SubcontractorPage({ user }) {
                             {canSubmit ? (
                               <button
                                 className="btn btn-small btn-success"
-                                onClick={() => handleSubmitWork(assignment.id, remaining)}
+                                onClick={() => setSelectedAssignment(assignment)}
                               >
-                                Сдать работу
+                                📊 Отметить
                               </button>
                             ) : (
                               <span style={{ color: '#999', fontSize: '0.9rem' }}>
@@ -179,6 +172,15 @@ export default function SubcontractorPage({ user }) {
           </>
         )}
       </div>
+
+      {/* Модальное окно с ползунком */}
+      {selectedAssignment && (
+        <VolumeSlider
+          assignment={selectedAssignment}
+          onSubmit={handleSubmitWork}
+          onClose={() => setSelectedAssignment(null)}
+        />
+      )}
     </div>
   );
 }
