@@ -7,9 +7,9 @@
             <Block Name="Блок А">
                 
                 <Floor Name="Этаж 1">
-                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-03" EndDate="2025-12-18" TotalVolume="500.00" CompletedVolume="0.00" Unit="м³"/>
-                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-12-20" EndDate="2025-12-29" TotalVolume="25" CompletedVolume="0" Unit="шт"/>
-                    <WorkType Name="Устройство стяжки пола" StartDate="2025-12-10" EndDate="2025-12-25" TotalVolume="320.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-03" EndDate="2025-12-18" TotalVolume="500.00" CompletedVolume="450.00" Unit="м³"/>
+                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-12-20" EndDate="2025-12-29" TotalVolume="25" CompletedVolume="10" Unit="шт"/>
+                    <WorkType Name="Устройство стяжки пола" StartDate="2025-12-10" EndDate="2025-12-25" TotalVolume="320.00" CompletedVolume="120.00" Unit="м²"/>
                     <WorkType Name="Штукатурка стен внутренняя" StartDate="2025-12-15" EndDate="2026-01-05" TotalVolume="850.00" CompletedVolume="0.00" Unit="м²"/>
                     <WorkType Name="Монтаж дверных блоков" StartDate="2025-12-28" EndDate="2026-01-10" TotalVolume="18" CompletedVolume="0" Unit="шт"/>
                 </Floor>
@@ -40,10 +40,10 @@
             <Block Name="Блок Б">
                 
                 <Floor Name="Этаж 1">
-                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-08" EndDate="2025-12-23" TotalVolume="450.00" CompletedVolume="0.00" Unit="м³"/>
-                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-12-25" EndDate="2026-01-03" TotalVolume="22" CompletedVolume="0" Unit="шт"/>
-                    <WorkType Name="Устройство стяжки пола" StartDate="2025-12-18" EndDate="2026-01-02" TotalVolume="280.00" CompletedVolume="0.00" Unit="м²"/>
-                    <WorkType Name="Штукатурка стен внутренняя" StartDate="2025-12-28" EndDate="2026-01-18" TotalVolume="750.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-08" EndDate="2025-12-23" TotalVolume="450.00" CompletedVolume="450.00" Unit="м³"/>
+                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-12-25" EndDate="2026-01-03" TotalVolume="22" CompletedVolume="15" Unit="шт"/>
+                    <WorkType Name="Устройство стяжки пола" StartDate="2025-12-18" EndDate="2026-01-02" TotalVolume="280.00" CompletedVolume="280.00" Unit="м²"/>
+                    <WorkType Name="Штукатурка стен внутренняя" StartDate="2025-12-28" EndDate="2026-01-18" TotalVolume="750.00" CompletedVolume="200.00" Unit="м²"/>
                     <WorkType Name="Электромонтажные работы" StartDate="2026-01-05" EndDate="2026-01-20" TotalVolume="100.00" CompletedVolume="0.00" Unit="м.п."/>
                 </Floor>
                 
@@ -65,7 +65,7 @@
             <Block Name="Блок В">
                 
                 <Floor Name="Этаж 1">
-                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-15" EndDate="2025-12-30" TotalVolume="380.00" CompletedVolume="0.00" Unit="м³"/>
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-15" EndDate="2025-12-30" TotalVolume="380.00" CompletedVolume="100.00" Unit="м³"/>
                     <WorkType Name="Монтаж оконных блоков" StartDate="2026-01-02" EndDate="2026-01-11" TotalVolume="20" CompletedVolume="0" Unit="шт"/>
                     <WorkType Name="Устройство стяжки пола" StartDate="2025-12-28" EndDate="2026-01-12" TotalVolume="250.00" CompletedVolume="0.00" Unit="м²"/>
                     <WorkType Name="Монтаж дверных блоков" StartDate="2026-01-08" EndDate="2026-01-18" TotalVolume="15" CompletedVolume="0" Unit="шт"/>
