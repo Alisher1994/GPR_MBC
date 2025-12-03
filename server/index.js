@@ -12,6 +12,7 @@ import subcontractorRoutes from './routes/subcontractor.js';
 
 // DB
 import createTables from './db/migrate.js';
+import pool from './db/pool.js';
 
 dotenv.config();
 
@@ -36,8 +37,30 @@ app.use('/api/foreman', foremanRoutes);
 app.use('/api/subcontractor', subcontractorRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
+app.get('/api/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    database: 'not checked'
+  };
+
+  // Check database connection
+  if (process.env.DATABASE_URL) {
+    try {
+      const result = await pool.query('SELECT NOW()');
+      health.database = 'connected';
+      health.dbTime = result.rows[0].now;
+    } catch (error) {
+      health.database = 'error';
+      health.dbError = error.message;
+    }
+  } else {
+    health.database = 'not configured';
+    health.warning = 'Add PostgreSQL database in Railway';
+  }
+
+  res.json(health);
 });
 
 // Serve React app for all other routes (SPA)
@@ -57,6 +80,23 @@ app.use((err, req, res, next) => {
 // Initialize database and start server
 const startServer = async () => {
   try {
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.warn('⚠️  WARNING: DATABASE_URL not set!');
+      console.warn('⚠️  Add PostgreSQL database in Railway:');
+      console.warn('⚠️  1. Click "New" → "Database" → "Add PostgreSQL"');
+      console.warn('⚠️  2. Redeploy the application');
+      console.log('');
+      console.log('🚀 Server starting WITHOUT database (limited functionality)...');
+      
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`⚠️  Database NOT connected - please add PostgreSQL`);
+        console.log(`📍 Health: http://localhost:${PORT}/api/health`);
+      });
+      return;
+    }
+
     // Create tables if they don't exist
     await createTables();
     console.log('✅ Database initialized');
@@ -68,6 +108,11 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
+    console.error('');
+    console.error('📋 Troubleshooting steps:');
+    console.error('1. Ensure PostgreSQL is added to Railway project');
+    console.error('2. Check DATABASE_URL is set in environment variables');
+    console.error('3. Wait for Railway to provision the database');
     process.exit(1);
   }
 };
