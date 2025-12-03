@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import pool from '../db/pool.js';
 
 const router = express.Router();
@@ -17,7 +17,8 @@ router.get('/upcoming-works/:objectId', async (req, res) => {
       `SELECT 
          wi.*,
          COALESCE(SUM(cw.completed_volume), 0) as actual_completed,
-         COUNT(DISTINCT wa.id) as assignments_count
+         COUNT(DISTINCT wa.id) as assignments_count,
+         COALESCE(SUM(wa.assigned_volume), 0) as assigned_total
        FROM work_items wi
        LEFT JOIN work_assignments wa ON wi.id = wa.work_item_id
        LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status = 'approved'
@@ -25,7 +26,7 @@ router.get('/upcoming-works/:objectId', async (req, res) => {
          AND wi.start_date <= $2
          AND wi.end_date >= $3
        GROUP BY wi.id
-       ORDER BY wi.start_date, wi.stage, wi.block, wi.floor`,
+       ORDER BY wi.start_date, wi.stage, wi.section, wi.floor`,
       [objectId, futureDate.toISOString().split('T')[0], today.toISOString().split('T')[0]]
     );
 
@@ -116,7 +117,7 @@ router.get('/pending-approvals/:foremanId', async (req, res) => {
          wa.assigned_volume,
          wi.work_type,
          wi.stage,
-         wi.block,
+         wi.section,
          wi.floor,
          wi.unit,
          u.username as subcontractor_name,
@@ -219,7 +220,7 @@ router.get('/my-assignments/:foremanId', async (req, res) => {
          wa.*,
          wi.work_type,
          wi.stage,
-         wi.block,
+         wi.section,
          wi.floor,
          wi.unit,
          wi.total_volume,
@@ -255,7 +256,7 @@ router.get('/sent-assignments/:foremanId', async (req, res) => {
          wa.*,
          wi.work_type,
          wi.stage,
-         wi.block,
+         wi.section,
          wi.floor,
          wi.unit,
          wi.start_date,

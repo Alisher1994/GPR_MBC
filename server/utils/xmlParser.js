@@ -1,4 +1,4 @@
-import xml2js from 'xml2js';
+﻿import xml2js from 'xml2js';
 import fs from 'fs/promises';
 
 /**
@@ -16,18 +16,18 @@ export async function parseXMLFile(filePath) {
     const workItems = [];
     const objectName = object.$.Name;
 
-    // Парсим структуру: Object → Stage → Block → Floor → WorkType
+    // Парсим структуру: Object → Stage → Section → Floor → WorkType
     const stages = Array.isArray(object.Stage) ? object.Stage : [object.Stage];
 
     for (const stage of stages) {
       if (!stage) continue;
       const stageName = stage.$.Name;
-      const blocks = Array.isArray(stage.Block) ? stage.Block : [stage.Block];
+      const sections = Array.isArray(stage.Section) ? stage.Section : [stage.Section];
 
-      for (const block of blocks) {
-        if (!block) continue;
-        const blockName = block.$.Name;
-        const floors = Array.isArray(block.Floor) ? block.Floor : [block.Floor];
+      for (const section of sections) {
+        if (!section) continue;
+        const sectionName = section.$.Name;
+        const floors = Array.isArray(section.Floor) ? section.Floor : [section.Floor];
 
         for (const floor of floors) {
           if (!floor) continue;
@@ -49,7 +49,7 @@ export async function parseXMLFile(filePath) {
 
             workItems.push({
               stage: stageName,
-              block: blockName,
+              section: sectionName,
               floor: floorName,
               workType: workType.$.Name,
               startDate: workType.$.StartDate,
@@ -87,13 +87,13 @@ export async function generateXMLFromData(objectName, workItems) {
   
   for (const item of workItems) {
     if (!grouped[item.stage]) grouped[item.stage] = {};
-    if (!grouped[item.stage][item.block]) grouped[item.stage][item.block] = {};
-    if (!grouped[item.stage][item.block][item.floor]) grouped[item.stage][item.block][item.floor] = [];
+    if (!grouped[item.stage][item.section]) grouped[item.stage][item.section] = {};
+    if (!grouped[item.stage][item.section][item.floor]) grouped[item.stage][item.section][item.floor] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[item.stage][item.block][item.floor].push({
+    grouped[item.stage][item.section][item.floor].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],
@@ -107,9 +107,9 @@ export async function generateXMLFromData(objectName, workItems) {
 
   // Строим структуру XML
   const stages = [];
-  for (const [stageName, blocks] of Object.entries(grouped)) {
-    const blockArray = [];
-    for (const [blockName, floors] of Object.entries(blocks)) {
+  for (const [stageName, sections] of Object.entries(grouped)) {
+    const sectionArray = [];
+    for (const [sectionName, floors] of Object.entries(sections)) {
       const floorArray = [];
       for (const [floorName, works] of Object.entries(floors)) {
         floorArray.push({
@@ -117,14 +117,14 @@ export async function generateXMLFromData(objectName, workItems) {
           WorkType: works
         });
       }
-      blockArray.push({
-        $: { Name: blockName },
+      sectionArray.push({
+        $: { Name: sectionName },
         Floor: floorArray
       });
     }
     stages.push({
       $: { Name: stageName },
-      Block: blockArray
+      Section: sectionArray
     });
   }
 
@@ -160,13 +160,13 @@ export async function generateCompletedWorksXML(objectName, workItems) {
   
   for (const item of completedItems) {
     if (!grouped[item.stage]) grouped[item.stage] = {};
-    if (!grouped[item.stage][item.block]) grouped[item.stage][item.block] = {};
-    if (!grouped[item.stage][item.block][item.floor]) grouped[item.stage][item.block][item.floor] = [];
+    if (!grouped[item.stage][item.section]) grouped[item.stage][item.section] = {};
+    if (!grouped[item.stage][item.section][item.floor]) grouped[item.stage][item.section][item.floor] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[item.stage][item.block][item.floor].push({
+    grouped[item.stage][item.section][item.floor].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],
@@ -180,9 +180,9 @@ export async function generateCompletedWorksXML(objectName, workItems) {
 
   // Строим структуру XML
   const stages = [];
-  for (const [stageName, blocks] of Object.entries(grouped)) {
-    const blockArray = [];
-    for (const [blockName, floors] of Object.entries(blocks)) {
+  for (const [stageName, sections] of Object.entries(grouped)) {
+    const sectionArray = [];
+    for (const [sectionName, floors] of Object.entries(sections)) {
       const floorArray = [];
       for (const [floorName, works] of Object.entries(floors)) {
         floorArray.push({
@@ -190,14 +190,14 @@ export async function generateCompletedWorksXML(objectName, workItems) {
           WorkType: works
         });
       }
-      blockArray.push({
-        $: { Name: blockName },
+      sectionArray.push({
+        $: { Name: sectionName },
         Floor: floorArray
       });
     }
     stages.push({
       $: { Name: stageName },
-      Block: blockArray
+      Section: sectionArray
     });
   }
 

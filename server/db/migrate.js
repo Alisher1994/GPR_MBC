@@ -53,7 +53,7 @@ const createTables = async () => {
         object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
         xml_file_id INTEGER REFERENCES xml_files(id) ON DELETE SET NULL,
         stage VARCHAR(255) NOT NULL,
-        block VARCHAR(255) NOT NULL,
+        section VARCHAR(255) NOT NULL,
         floor VARCHAR(255) NOT NULL,
         work_type VARCHAR(255) NOT NULL,
         start_date DATE NOT NULL,
@@ -64,7 +64,7 @@ const createTables = async () => {
         daily_target NUMERIC(12, 2),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(object_id, stage, block, floor, work_type)
+        UNIQUE(object_id, stage, section, floor, work_type)
       )
     `);
 

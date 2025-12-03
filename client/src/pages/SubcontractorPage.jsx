@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { subcontractor } from '../api';
 import VolumeSlider from '../components/VolumeSlider';
 
@@ -117,7 +117,7 @@ export default function SubcontractorPage({ user }) {
                     <tr>
                       <th>Объект</th>
                       <th>Работа</th>
-                      <th>Блок</th>
+                      <th>Секция</th>
                       <th>Этаж</th>
                       <th>Период</th>
                       <th>Назначено</th>
@@ -137,7 +137,7 @@ export default function SubcontractorPage({ user }) {
                         <tr key={assignment.id}>
                           <td>{assignment.object_name}</td>
                           <td>{assignment.work_type}</td>
-                          <td>{assignment.block}</td>
+                          <td>{assignment.section}</td>
                           <td>{assignment.floor}</td>
                           <td>
                             {new Date(assignment.start_date).toLocaleDateString('ru-RU')}

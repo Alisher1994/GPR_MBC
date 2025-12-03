@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 
 export default function VolumeSlider({ assignment, onSubmit, onClose }) {
   const [volume, setVolume] = useState(0);
@@ -112,7 +112,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
               margin: 0,
               fontWeight: '500'
             }}>
-              {assignment.block} · {assignment.floor}
+              {assignment.section} · {assignment.floor}
             </p>
           </div>
           <button 

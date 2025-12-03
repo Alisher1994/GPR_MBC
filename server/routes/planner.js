@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -80,10 +80,10 @@ router.post('/upload', upload.single('xmlFile'), async (req, res) => {
     for (const item of workItems) {
       await client.query(
         `INSERT INTO work_items 
-         (object_id, xml_file_id, stage, block, floor, work_type, start_date, end_date, 
+         (object_id, xml_file_id, stage, section, floor, work_type, start_date, end_date, 
           total_volume, completed_volume, unit, daily_target)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         ON CONFLICT (object_id, stage, block, floor, work_type)
+         ON CONFLICT (object_id, stage, section, floor, work_type)
          DO UPDATE SET
            start_date = EXCLUDED.start_date,
            end_date = EXCLUDED.end_date,
@@ -92,7 +92,7 @@ router.post('/upload', upload.single('xmlFile'), async (req, res) => {
            daily_target = EXCLUDED.daily_target,
            xml_file_id = EXCLUDED.xml_file_id,
            updated_at = CURRENT_TIMESTAMP`,
-        [objectId, xmlFileId, item.stage, item.block, item.floor, item.workType,
+        [objectId, xmlFileId, item.stage, item.section, item.floor, item.workType,
          item.startDate, item.endDate, item.totalVolume, item.completedVolume, 
          item.unit, item.dailyTarget]
       );
@@ -162,7 +162,7 @@ router.get('/objects/:id', async (req, res) => {
     const workItemsResult = await pool.query(
       `SELECT * FROM work_items 
        WHERE object_id = $1 
-       ORDER BY start_date, stage, block, floor`,
+       ORDER BY start_date, stage, section, floor`,
       [id]
     );
 
@@ -191,7 +191,7 @@ router.get('/export/:objectId', async (req, res) => {
     }
 
     const workItemsResult = await pool.query(
-      'SELECT * FROM work_items WHERE object_id = $1 ORDER BY stage, block, floor',
+      'SELECT * FROM work_items WHERE object_id = $1 ORDER BY stage, section, floor',
       [objectId]
     );
 
@@ -225,7 +225,7 @@ router.get('/export-completed/:objectId', async (req, res) => {
     }
 
     const workItemsResult = await pool.query(
-      'SELECT * FROM work_items WHERE object_id = $1 AND completed_volume > 0 ORDER BY stage, block, floor',
+      'SELECT * FROM work_items WHERE object_id = $1 AND completed_volume > 0 ORDER BY stage, section, floor',
       [objectId]
     );
 

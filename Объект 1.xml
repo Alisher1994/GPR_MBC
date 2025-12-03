@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ProjectData>
     <Object Name="Объект 1 - Жилой Комплекс Новая Москва">
         
         <Stage Name="Очередь 1 (Этап 1)">
             
-            <Block Name="Блок А">
+            <Section Name="Секция 1">
                 
                 <Floor Name="Этаж 1">
                     <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-03" EndDate="2025-12-18" TotalVolume="500.00" CompletedVolume="0.00" Unit="м³"/>
@@ -35,9 +35,9 @@
                     <WorkType Name="Устройство стяжки пола" StartDate="2026-02-18" EndDate="2026-03-05" TotalVolume="320.00" CompletedVolume="0.00" Unit="м²"/>
                 </Floor>
                 
-            </Block>
+            </Section>
             
-            <Block Name="Блок Б">
+            <Section Name="Секция 2">
                 
                 <Floor Name="Этаж 1">
                     <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-08" EndDate="2025-12-23" TotalVolume="450.00" CompletedVolume="0.00" Unit="м³"/>
@@ -60,9 +60,9 @@
                     <WorkType Name="Устройство стяжки пола" StartDate="2026-02-03" EndDate="2026-02-18" TotalVolume="280.00" CompletedVolume="0.00" Unit="м²"/>
                 </Floor>
                 
-            </Block>
+            </Section>
             
-            <Block Name="Блок В">
+            <Section Name="Секция 3">
                 
                 <Floor Name="Этаж 1">
                     <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-12-15" EndDate="2025-12-30" TotalVolume="380.00" CompletedVolume="0.00" Unit="м³"/>
@@ -77,13 +77,13 @@
                     <WorkType Name="Устройство стяжки пола" StartDate="2026-01-20" EndDate="2026-02-04" TotalVolume="250.00" CompletedVolume="0.00" Unit="м²"/>
                 </Floor>
                 
-            </Block>
+            </Section>
             
         </Stage>
         
         <Stage Name="Очередь 2 (Этап 2)">
         
-            <Block Name="Блок Г">
+            <Section Name="Секция 4">
             
                 <Floor Name="Этаж 1">
                     <WorkType Name="Устройство фундамента" StartDate="2026-01-19" EndDate="2026-02-02" TotalVolume="150.00" CompletedVolume="0.00" Unit="м³"/>
@@ -98,9 +98,9 @@
                     <WorkType Name="Устройство стяжки пола" StartDate="2026-03-15" EndDate="2026-03-30" TotalVolume="300.00" CompletedVolume="0.00" Unit="м²"/>
                 </Floor>
                 
-            </Block>
+            </Section>
             
-            <Block Name="Блок Д">
+            <Section Name="Секция 5">
             
                 <Floor Name="Этаж 1">
                     <WorkType Name="Устройство фундамента" StartDate="2026-02-05" EndDate="2026-02-19" TotalVolume="130.00" CompletedVolume="0.00" Unit="м³"/>
@@ -108,7 +108,7 @@
                     <WorkType Name="Кладка кирпича внешних стен" StartDate="2026-03-01" EndDate="2026-03-16" TotalVolume="400.00" CompletedVolume="0.00" Unit="м³"/>
                 </Floor>
                 
-            </Block>
+            </Section>
             
         </Stage>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { planner } from '../api';
 
 export default function PlannerPage({ user }) {
@@ -221,7 +221,7 @@ export default function PlannerPage({ user }) {
                 <thead>
                   <tr>
                     <th>Очередь</th>
-                    <th>Блок</th>
+                    <th>Секция</th>
                     <th>Этаж</th>
                     <th>Вид работ</th>
                     <th>Начало</th>
@@ -235,7 +235,7 @@ export default function PlannerPage({ user }) {
                   {selectedObject.workItems.map((item) => (
                     <tr key={item.id}>
                       <td>{item.stage}</td>
-                      <td>{item.block}</td>
+                      <td>{item.section}</td>
                       <td>{item.floor}</td>
                       <td>{item.work_type}</td>
                       <td>{new Date(item.start_date).toLocaleDateString('ru-RU')}</td>

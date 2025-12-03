@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 export default function KanbanBoard({ pendingApprovals, sentAssignments, onApprove, onReject }) {
   const [draggedItem, setDraggedItem] = useState(null);
@@ -151,7 +151,7 @@ export default function KanbanBoard({ pendingApprovals, sentAssignments, onAppro
                       {item.work_type}
                     </h4>
                     <div style={{ fontSize: '0.8rem', color: '#8e8e93', fontWeight: '500' }}>
-                      {item.block} · {item.floor}
+                      {item.section} · {item.floor}
                     </div>
                   </div>
 

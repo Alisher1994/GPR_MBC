@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { foreman, planner, auth } from '../api';
 import KanbanBoard from '../components/KanbanBoard';
 
@@ -11,7 +11,7 @@ export default function ForemanPage({ user }) {
   const [subcontractors, setSubcontractors] = useState([]);
   const [activeTab, setActiveTab] = useState('works');
   const [loading, setLoading] = useState(false);
-  const [expandedBlocks, setExpandedBlocks] = useState({});
+  const [expandedSections, setexpandedSections] = useState({});
   const [expandedFloors, setExpandedFloors] = useState({});
 
   useEffect(() => {
@@ -71,8 +71,8 @@ export default function ForemanPage({ user }) {
     }
   };
 
-  const toggleBlock = (blockName) => {
-    setExpandedBlocks(prev => ({ ...prev, [blockName]: !prev[blockName] }));
+  const toggleSection = (sectionName) => {
+    setExpandedSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
   };
 
   const toggleFloor = (key) => {
@@ -83,14 +83,14 @@ export default function ForemanPage({ user }) {
     const grouped = {};
     works.forEach(work => {
       const stage = work.stage || 'Без очереди';
-      const block = work.block || 'Без блока';
+      const section = work.section || 'Без секции';
       const floor = work.floor || 'Без этажа';
       
       if (!grouped[stage]) grouped[stage] = {};
-      if (!grouped[stage][block]) grouped[stage][block] = {};
-      if (!grouped[stage][block][floor]) grouped[stage][block][floor] = [];
+      if (!grouped[stage][section]) grouped[stage][section] = {};
+      if (!grouped[stage][section][floor]) grouped[stage][section][floor] = [];
       
-      grouped[stage][block][floor].push(work);
+      grouped[stage][section][floor].push(work);
     });
     return grouped;
   };
@@ -149,7 +149,7 @@ export default function ForemanPage({ user }) {
       <h2 className="mb-3">Панель прораба</h2>
 
       {/* Табы */}
-      <div className="card">
+      <div className="card" style={{ position: 'sticky', top: '70px', zIndex: 50, background: '#fff', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '2px solid #e5e5ea' }}>
           <button
             onClick={() => setActiveTab('works')}
@@ -205,66 +205,70 @@ export default function ForemanPage({ user }) {
         {/* Вкладка "Работы" */}
         {activeTab === 'works' && (
           <>
-            <div className="form-group">
-              <label>Выберите объект</label>
-              <select
-                value={selectedObjectId}
-                onChange={(e) => setSelectedObjectId(e.target.value)}
-              >
-                <option value="">-- Выберите объект --</option>
-                {objects.map(obj => (
-                  <option key={obj.id} value={obj.id}>{obj.name}</option>
-                ))}
-              </select>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+              <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                <label>Выберите объект</label>
+                <select
+                  value={selectedObjectId}
+                  onChange={(e) => setSelectedObjectId(e.target.value)}
+                >
+                  <option value="">-- Выберите объект --</option>
+                  {objects.map(obj => (
+                    <option key={obj.id} value={obj.id}>{obj.name}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedObjectId && (
+                <button
+                  className="btn btn-primary"
+                  onClick={loadUpcomingWorks}
+                  disabled={loading}
+                  style={{ marginBottom: 0, whiteSpace: 'nowrap' }}
+                >
+                  Сформировать
+                </button>
+              )}
             </div>
-
-            {selectedObjectId && (
-              <button
-                className="btn btn-primary mb-3"
-                onClick={loadUpcomingWorks}
-                disabled={loading}
-              >
-                Сформировать список работ (2 недели)
-              </button>
-            )}
 
             {loading && <p className="loading">Загрузка...</p>}
 
             {upcomingWorks.length > 0 && (
               <div>
                 <h3 className="mb-2">Работы на ближайшие 2 недели</h3>
-                {Object.entries(groupWorksByStructure(upcomingWorks)).map(([stage, blocks]) => (
+                {Object.entries(groupWorksByStructure(upcomingWorks)).map(([stage, sections]) => (
                   <div key={stage} style={{ marginBottom: '1rem' }}>
                     <h4 style={{ background: '#e3f2fd', padding: '0.5rem', borderRadius: '4px' }}>{stage}</h4>
-                    {Object.entries(blocks).map(([block, floors]) => (
-                      <div key={block} style={{ marginLeft: '1rem', marginBottom: '0.5rem' }}>
+                    {Object.entries(sections).map(([section, floors]) => (
+                      <div key={section} style={{ marginLeft: '1rem', marginBottom: '0.5rem' }}>
                         <div 
-                          onClick={() => toggleBlock(`${stage}-${block}`)}
+                          onClick={() => toggleSection(`${stage}-${section}`)}
                           style={{ 
                             background: '#f5f5f5', 
                             padding: '0.5rem', 
                             cursor: 'pointer',
                             borderRadius: '4px',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            transition: 'all 0.3s ease'
                           }}
                         >
-                          {expandedBlocks[`${stage}-${block}`] ? '▼' : '▶'} {block}
+                          {expandedSections[`${stage}-${section}`] ? '▼' : '▶'} {section}
                         </div>
-                        {expandedBlocks[`${stage}-${block}`] && Object.entries(floors).map(([floor, works]) => (
+                        {expandedSections[`${stage}-${section}`] && Object.entries(floors).map(([floor, works]) => (
                           <div key={floor} style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
                             <div 
-                              onClick={() => toggleFloor(`${stage}-${block}-${floor}`)}
+                              onClick={() => toggleFloor(`${stage}-${section}-${floor}`)}
                               style={{ 
                                 background: '#fafafa', 
                                 padding: '0.4rem', 
                                 cursor: 'pointer',
                                 borderRadius: '4px',
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                transition: 'all 0.3s ease'
                               }}
                             >
-                              {expandedFloors[`${stage}-${block}-${floor}`] ? '▼' : '▶'} {floor}
+                              {expandedFloors[`${stage}-${section}-${floor}`] ? '▼' : '▶'} {floor}
                             </div>
-                            {expandedFloors[`${stage}-${block}-${floor}`] && (
+                            {expandedFloors[`${stage}-${section}-${floor}`] && (
                               <div style={{ marginLeft: '1rem', marginTop: '0.5rem', overflowX: 'auto' }}>
                                 <table className="table">
                                   <thead>
@@ -274,29 +278,37 @@ export default function ForemanPage({ user }) {
                                       <th>Окончание</th>
                                       <th>Объем</th>
                                       <th>Выполнено</th>
-                                      <th>Назначений</th>
+                                      <th>Назначено</th>
+                                      <th>Остаток</th>
                                       <th>Действие</th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {works.map((work) => (
-                                      <tr key={work.id}>
-                                        <td>{work.work_type}</td>
-                                        <td>{new Date(work.start_date).toLocaleDateString('ru-RU')}</td>
-                                        <td>{new Date(work.end_date).toLocaleDateString('ru-RU')}</td>
-                                        <td>{work.total_volume} {work.unit}</td>
-                                        <td>{work.actual_completed} {work.unit}</td>
-                                        <td>{work.assignments_count}</td>
-                                        <td>
-                                          <button
-                                            className="btn btn-small btn-success"
-                                            onClick={() => handleAssignWork(work.id, work)}
-                                          >
-                                            Распределить
-                                          </button>
-                                        </td>
-                                      </tr>
-                                    ))}
+                                    {works.map((work) => {
+                                      const remaining = work.total_volume - (work.actual_completed || 0) - ((work.assignments_count || 0) > 0 ? (work.assigned_total || 0) : 0);
+                                      const isCompleted = remaining <= 0;
+                                      return (
+                                        <tr key={work.id} style={isCompleted ? { textDecoration: 'line-through', opacity: 0.6, background: '#f0f0f0' } : {}}>
+                                          <td>{work.work_type}</td>
+                                          <td>{new Date(work.start_date).toLocaleDateString('ru-RU')}</td>
+                                          <td>{new Date(work.end_date).toLocaleDateString('ru-RU')}</td>
+                                          <td>{work.total_volume} {work.unit}</td>
+                                          <td>{work.actual_completed || 0} {work.unit}</td>
+                                          <td>{work.assigned_total || 0} {work.unit}</td>
+                                          <td style={{ fontWeight: '600', color: remaining > 0 ? '#007aff' : '#34c759' }}>{remaining.toFixed(2)} {work.unit}</td>
+                                          <td>
+                                            {!isCompleted && (
+                                              <button
+                                                className="btn btn-small btn-success"
+                                                onClick={() => handleAssignWork(work.id, work)}
+                                              >
+                                                Распределить
+                                              </button>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
                                   </tbody>
                                 </table>
                               </div>
@@ -321,19 +333,6 @@ export default function ForemanPage({ user }) {
             onReject={(id) => handleApproveWork(id, false)}
           />
         )}
-      </div>
-
-      {/* Список субподрядчиков для справки */}
-      <div className="card">
-        <h3 className="card-title">Доступные субподрядчики</h3>
-        <div className="grid grid-3">
-          {subcontractors.map((sub, idx) => (
-            <div key={sub.id} style={{ padding: '0.75rem', background: '#f8f9fa', borderRadius: '8px' }}>
-              <strong>#{idx + 1}</strong> - {sub.username}
-              {sub.company_name && <><br/><small>{sub.company_name}</small></>}
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

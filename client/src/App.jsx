@@ -61,7 +61,10 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1>🏗️ Система учета строительных работ</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <img src="/Logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
+            <h1>Учёт СМР</h1>
+          </div>
           <div className="user-info">
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: '600' }}>{user.username}</div>

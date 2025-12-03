@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import pool from '../db/pool.js';
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.get('/my-assignments/:subcontractorId', async (req, res) => {
         wa.*,
         wi.work_type,
         wi.stage,
-        wi.block,
+        wi.section,
         wi.floor,
         wi.unit,
         wi.daily_target,
@@ -135,7 +135,7 @@ router.get('/work-history/:subcontractorId', async (req, res) => {
         wa.assigned_volume,
         wi.work_type,
         wi.stage,
-        wi.block,
+        wi.section,
         wi.floor,
         wi.unit,
         o.name as object_name,
