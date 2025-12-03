@@ -219,27 +219,27 @@ router.post('/sections/:sectionId/upload-xml', upload.single('xmlFile'), async (
 
     const xmlFileId = xmlFileResult.rows[0].id;
 
-    // Парсим XML
-    const parsedData = await parseXMLFile(file.path);
+    // Парсим XML - получаем массив work items (только floor и workType)
+    const workItems = await parseXMLFile(file.path);
 
     // Удаляем старые work_items для этой секции
     await client.query('DELETE FROM work_items WHERE section_id = $1', [sectionId]);
 
     // Вставляем новые work_items
-    for (const item of parsedData) {
+    for (const item of workItems) {
       await client.query(
         `INSERT INTO work_items 
-         (section_id, xml_file_id, stage, section, floor, work_type, start_date, end_date, 
+         (section_id, xml_file_id, floor, work_type, start_date, end_date, 
           total_volume, completed_volume, unit) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         ON CONFLICT (section_id, stage, section, floor, work_type)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT (section_id, floor, work_type)
          DO UPDATE SET
            start_date = EXCLUDED.start_date,
            end_date = EXCLUDED.end_date,
            total_volume = EXCLUDED.total_volume,
            xml_file_id = EXCLUDED.xml_file_id,
            updated_at = CURRENT_TIMESTAMP`,
-        [sectionId, xmlFileId, item.stage, item.section, item.floor, item.workType,
+        [sectionId, xmlFileId, item.floor, item.workType,
          item.startDate, item.endDate, item.totalVolume, item.completedVolume, item.unit]
       );
     }

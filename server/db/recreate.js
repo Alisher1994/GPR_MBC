@@ -86,14 +86,12 @@ const recreateTables = async (retries = 5, delay = 3000) => {
         `);
         console.log('✓ XML files table');
 
-        // Таблица работ
+        // Таблица работ (только этажи и виды работ, так как секции создаются вручную)
         await client.query(`
           CREATE TABLE work_items (
             id SERIAL PRIMARY KEY,
             section_id INTEGER REFERENCES sections(id) ON DELETE CASCADE,
             xml_file_id INTEGER REFERENCES xml_files(id) ON DELETE SET NULL,
-            stage VARCHAR(255) NOT NULL,
-            section VARCHAR(255) NOT NULL,
             floor VARCHAR(255) NOT NULL,
             work_type VARCHAR(255) NOT NULL,
             start_date DATE NOT NULL,
@@ -104,7 +102,7 @@ const recreateTables = async (retries = 5, delay = 3000) => {
             daily_target NUMERIC(12, 2),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(section_id, stage, section, floor, work_type)
+            UNIQUE(section_id, floor, work_type)
           )
         `);
         console.log('✓ Work items table');

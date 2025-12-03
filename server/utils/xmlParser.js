@@ -2,7 +2,8 @@
 import fs from 'fs/promises';
 
 /**
- * Парсит XML файл из Primavera P6 и возвращает структурированные данные
+ * Парсит XML файл из Primavera P6 и возвращает только этажи и виды работ
+ * Object и Section создаются вручную в UI, поэтому парсим только Floor → WorkType
  */
 export async function parseXMLFile(filePath) {
   try {
@@ -14,19 +15,17 @@ export async function parseXMLFile(filePath) {
     const object = projectData.Object;
     
     const workItems = [];
-    const objectName = object.$.Name;
 
     // Парсим структуру: Object → Stage → Section → Floor → WorkType
+    // Но извлекаем только Floor и WorkType, так как Object/Section уже созданы вручную
     const stages = Array.isArray(object.Stage) ? object.Stage : [object.Stage];
 
     for (const stage of stages) {
       if (!stage) continue;
-      const stageName = stage.$.Name;
       const sections = Array.isArray(stage.Section) ? stage.Section : [stage.Section];
 
       for (const section of sections) {
         if (!section) continue;
-        const sectionName = section.$.Name;
         const floors = Array.isArray(section.Floor) ? section.Floor : [section.Floor];
 
         for (const floor of floors) {
@@ -40,16 +39,13 @@ export async function parseXMLFile(filePath) {
             const startDate = new Date(workType.$.StartDate);
             const endDate = new Date(workType.$.EndDate);
             const totalVolume = parseFloat(workType.$.TotalVolume);
-            // Всегда начинаем с нуля, игнорируем CompletedVolume из XML
-            const completedVolume = 0;
+            const completedVolume = 0; // Всегда начинаем с нуля
             
             // Вычисляем дневную норму
             const workDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) || 1;
             const dailyTarget = totalVolume / workDays;
 
             workItems.push({
-              stage: stageName,
-              section: sectionName,
               floor: floorName,
               workType: workType.$.Name,
               startDate: workType.$.StartDate,
@@ -64,10 +60,7 @@ export async function parseXMLFile(filePath) {
       }
     }
 
-    return {
-      objectName,
-      workItems
-    };
+    return workItems;
   } catch (error) {
     console.error('Ошибка парсинга XML:', error);
     throw new Error('Не удалось распарсить XML файл');
