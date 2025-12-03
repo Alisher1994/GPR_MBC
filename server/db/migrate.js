@@ -1,28 +1,36 @@
 import pool from './pool.js';
 
-const createTables = async () => {
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const createTables = async (retries = 5, delay = 3000) => {
   // Check if DATABASE_URL is set
   if (!process.env.DATABASE_URL) {
     console.warn('⚠️  Skipping database setup - DATABASE_URL not set');
     return;
   }
 
-  const client = await pool.connect();
+  let lastError;
   
-  try {
-    await client.query('BEGIN');
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`📊 Attempting to connect to database (attempt ${attempt}/${retries})...`);
+      const client = await pool.connect();
+      
+      try {
+        await client.query('BEGIN');
+        console.log('✅ Database connection successful!');
 
-    // Таблица пользователей
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        role VARCHAR(50) NOT NULL CHECK (role IN ('planner', 'foreman', 'subcontractor')),
-        company_name VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+        // Таблица пользователей
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL CHECK (role IN ('planner', 'foreman', 'subcontractor')),
+            company_name VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
 
     // Таблица объектов
     await client.query(`
@@ -107,13 +115,28 @@ const createTables = async () => {
 
     await client.query('COMMIT');
     console.log('✅ Таблицы базы данных успешно созданы');
+    return; // Успешное завершение
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Ошибка создания таблиц:', error);
-    throw error;
+    console.error(`❌ Ошибка создания таблиц (попытка ${attempt}/${retries}):`, error.message);
+    lastError = error;
   } finally {
     client.release();
   }
+    } catch (connectionError) {
+      console.error(`❌ Не удалось подключиться к базе данных (попытка ${attempt}/${retries}):`, connectionError.message);
+      lastError = connectionError;
+    }
+
+    if (attempt < retries) {
+      console.log(`⏳ Ожидание ${delay / 1000} секунд перед следующей попыткой...`);
+      await sleep(delay);
+    }
+  }
+
+  // Если все попытки исчерпаны
+  console.error('❌ Не удалось подключиться к базе данных после всех попыток');
+  throw lastError;
 };
 
 // Запуск миграции при прямом вызове
