@@ -79,14 +79,18 @@ export async function generateXMLFromData(objectName, workItems) {
   const grouped = {};
   
   for (const item of workItems) {
-    if (!grouped[item.stage]) grouped[item.stage] = {};
-    if (!grouped[item.stage][item.section]) grouped[item.stage][item.section] = {};
-    if (!grouped[item.stage][item.section][item.floor]) grouped[item.stage][item.section][item.floor] = [];
+    const stageName = item.stage || item.stage_name || item.section_name || 'Stage 1';
+    const sectionName = item.section || item.section_name || `Section ${item.section_number || ''}`.trim() || 'Section';
+    const floorName = item.floor || 'Floor';
+
+    if (!grouped[stageName]) grouped[stageName] = {};
+    if (!grouped[stageName][sectionName]) grouped[stageName][sectionName] = {};
+    if (!grouped[stageName][sectionName][floorName]) grouped[stageName][sectionName][floorName] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[item.stage][item.section][item.floor].push({
+    grouped[stageName][sectionName][floorName].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],
@@ -152,14 +156,18 @@ export async function generateCompletedWorksXML(objectName, workItems) {
   const grouped = {};
   
   for (const item of completedItems) {
-    if (!grouped[item.stage]) grouped[item.stage] = {};
-    if (!grouped[item.stage][item.section]) grouped[item.stage][item.section] = {};
-    if (!grouped[item.stage][item.section][item.floor]) grouped[item.stage][item.section][item.floor] = [];
+    const stageName = item.stage || item.stage_name || item.section_name || 'Stage 1';
+    const sectionName = item.section || item.section_name || `Section ${item.section_number || ''}`.trim() || 'Section';
+    const floorName = item.floor || 'Floor';
+
+    if (!grouped[stageName]) grouped[stageName] = {};
+    if (!grouped[stageName][sectionName]) grouped[stageName][sectionName] = {};
+    if (!grouped[stageName][sectionName][floorName]) grouped[stageName][sectionName][floorName] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[item.stage][item.section][item.floor].push({
+    grouped[stageName][sectionName][floorName].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],

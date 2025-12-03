@@ -252,10 +252,11 @@
 
   return (
     <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      display: 'flex',
       gap: '1rem',
-      padding: '1rem 0'
+      padding: '1rem 0',
+      overflowX: 'auto',
+      alignItems: 'stretch'
     }}>
       {sections.map((section) => (
         <div
@@ -267,7 +268,9 @@
             minHeight: '320px',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            flex: '0 0 320px',
+            minWidth: '320px'
           }}
         >
           <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: `3px solid ${section.color}` }}>

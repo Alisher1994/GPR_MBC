@@ -286,8 +286,24 @@ router.get('/sections/:sectionId/export', async (req, res) => {
   try {
     const { sectionId } = req.params;
 
+    const sectionInfo = await pool.query(
+      `SELECT s.section_name, s.section_number, o.name AS object_name
+       FROM sections s
+       JOIN objects o ON s.object_id = o.id
+       WHERE s.id = $1`,
+      [sectionId]
+    );
+
+    if (sectionInfo.rowCount === 0) {
+      return res.status(404).json({ error: 'Секция не найдена' });
+    }
+
     const result = await pool.query(
-      `SELECT * FROM work_items WHERE section_id = $1 ORDER BY stage, section, floor`,
+      `SELECT wi.*, s.section_name, s.section_number
+       FROM work_items wi
+       JOIN sections s ON wi.section_id = s.id
+       WHERE wi.section_id = $1
+       ORDER BY wi.floor, wi.work_type`,
       [sectionId]
     );
 
@@ -295,7 +311,7 @@ router.get('/sections/:sectionId/export', async (req, res) => {
       return res.status(404).json({ error: 'Нет данных для экспорта' });
     }
 
-    const xmlContent = generateXMLFromData(result.rows);
+    const xmlContent = await generateXMLFromData(sectionInfo.rows[0].object_name, result.rows);
     
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename=export-section-${sectionId}.xml`);
@@ -312,10 +328,24 @@ router.get('/sections/:sectionId/export-completed', async (req, res) => {
   try {
     const { sectionId } = req.params;
 
+    const sectionInfo = await pool.query(
+      `SELECT s.section_name, s.section_number, o.name AS object_name
+       FROM sections s
+       JOIN objects o ON s.object_id = o.id
+       WHERE s.id = $1`,
+      [sectionId]
+    );
+
+    if (sectionInfo.rowCount === 0) {
+      return res.status(404).json({ error: 'Секция не найдена' });
+    }
+
     const result = await pool.query(
-      `SELECT * FROM work_items 
-       WHERE section_id = $1 AND completed_volume > 0 
-       ORDER BY stage, section, floor`,
+      `SELECT wi.*, s.section_name, s.section_number
+       FROM work_items wi
+       JOIN sections s ON wi.section_id = s.id
+       WHERE wi.section_id = $1 AND wi.completed_volume > 0
+       ORDER BY wi.floor, wi.work_type`,
       [sectionId]
     );
 
@@ -323,7 +353,7 @@ router.get('/sections/:sectionId/export-completed', async (req, res) => {
       return res.status(404).json({ error: 'Нет завершенных работ для экспорта' });
     }
 
-    const xmlContent = generateCompletedWorksXML(result.rows);
+    const xmlContent = await generateCompletedWorksXML(sectionInfo.rows[0].object_name, result.rows);
     
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename=completed-section-${sectionId}.xml`);
