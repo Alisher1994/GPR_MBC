@@ -128,7 +128,22 @@ export default function PlannerPage({ user }) {
             <tbody>
               {objects.map((obj) => (
                 <tr key={obj.id}>
-                  <td>{obj.name}</td>
+                  <td>
+                    {obj.name}
+                    {obj.has_updates && (
+                      <span style={{
+                        marginLeft: '0.5rem',
+                        padding: '0.2rem 0.5rem',
+                        background: '#ffc107',
+                        color: '#000',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold'
+                      }}>
+                        Есть изменения
+                      </span>
+                    )}
+                  </td>
                   <td>{obj.work_items_count}</td>
                   <td>{obj.last_update ? new Date(obj.last_update).toLocaleString('ru-RU') : '-'}</td>
                   <td>
@@ -142,8 +157,9 @@ export default function PlannerPage({ user }) {
                       <button
                         className="btn btn-small btn-success"
                         onClick={() => handleExport(obj.id)}
+                        title="Скачать актуальную версию XML с выполненными объемами"
                       >
-                        Экспорт XML
+                        📥 Скачать XML
                       </button>
                       <button
                         className="btn btn-small btn-danger"

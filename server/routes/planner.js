@@ -123,10 +123,17 @@ router.get('/objects', async (req, res) => {
     const result = await pool.query(`
       SELECT o.*, 
              COUNT(DISTINCT wi.id) as work_items_count,
-             MAX(xf.uploaded_at) as last_update
+             MAX(xf.uploaded_at) as last_update,
+             CASE 
+               WHEN SUM(CASE WHEN wi.completed_volume > 0 THEN 1 ELSE 0 END) > 0 
+                    OR COUNT(wa.id) > 0 
+               THEN true 
+               ELSE false 
+             END as has_updates
       FROM objects o
       LEFT JOIN work_items wi ON o.id = wi.object_id
       LEFT JOIN xml_files xf ON o.id = xf.object_id
+      LEFT JOIN work_assignments wa ON wi.id = wa.work_item_id
       GROUP BY o.id
       ORDER BY o.created_at DESC
     `);
