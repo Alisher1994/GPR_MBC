@@ -41,7 +41,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
   const handleTouchMove = (e) => {
     if (!isDragging || !containerRef.current) return;
     
-    e.preventDefault(); // Предотвращаем скролл страницы
+    e.preventDefault();
     
     const touch = e.touches[0];
     const rect = containerRef.current.getBoundingClientRect();
@@ -73,179 +73,312 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleMouseUp}
       style={{ 
-        touchAction: 'none', // Отключаем стандартные touch жесты
-        overscrollBehavior: 'contain' // Предотвращаем резиновый эффект
+        touchAction: 'none',
+        overscrollBehavior: 'contain',
+        background: 'rgba(0, 0, 0, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)'
       }}
     >
-      <div className="modal-content" style={{ maxWidth: '500px', touchAction: 'none' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3>Отметить выполнение</h3>
-          <button className="btn btn-small btn-secondary" onClick={onClose}>✕</button>
-        </div>
-
-        <div style={{ marginBottom: '1.5rem' }}>
-          <p><strong>{assignment.work_type}</strong></p>
-          <p style={{ fontSize: '0.9rem', color: '#666' }}>
-            {assignment.block} / {assignment.floor}
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="modal-content" style={{ 
+        maxWidth: '420px',
+        touchAction: 'none',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(40px)',
+        WebkitBackdropFilter: 'blur(40px)',
+        padding: '1.5rem',
+        borderRadius: '24px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+      }}>
+        {/* Заголовок */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '1.5rem' 
+        }}>
           <div>
-            <small style={{ color: '#666' }}>Назначено</small>
-            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0.25rem 0' }}>
-              {maxVolume} {assignment.unit}
+            <h3 style={{ 
+              fontSize: '1.3rem', 
+              fontWeight: '600', 
+              margin: '0 0 0.25rem 0',
+              color: '#1c1c1e'
+            }}>
+              {assignment.work_type}
+            </h3>
+            <p style={{ 
+              fontSize: '0.85rem', 
+              color: '#8e8e93', 
+              margin: 0,
+              fontWeight: '500'
+            }}>
+              {assignment.block} · {assignment.floor}
             </p>
           </div>
-          <div>
-            <small style={{ color: '#666' }}>Выполнено ранее</small>
-            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0.25rem 0', color: '#28a745' }}>
-              {alreadyCompleted} {assignment.unit}
-            </p>
+          <button 
+            onClick={onClose}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(142, 142, 147, 0.12)',
+              color: '#8e8e93',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(142, 142, 147, 0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'rgba(142, 142, 147, 0.12)'}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Статистика */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '0.75rem', 
+          marginBottom: '1.5rem' 
+        }}>
+          <div style={{
+            background: 'rgba(0, 122, 255, 0.08)',
+            borderRadius: '12px',
+            padding: '0.75rem',
+          }}>
+            <div style={{ fontSize: '0.75rem', color: '#8e8e93', fontWeight: '500', marginBottom: '0.25rem' }}>
+              Назначено
+            </div>
+            <div style={{ fontSize: '1.4rem', fontWeight: '600', color: '#007aff' }}>
+              {maxVolume} <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{assignment.unit}</span>
+            </div>
+          </div>
+          <div style={{
+            background: 'rgba(52, 199, 89, 0.08)',
+            borderRadius: '12px',
+            padding: '0.75rem',
+          }}>
+            <div style={{ fontSize: '0.75rem', color: '#8e8e93', fontWeight: '500', marginBottom: '0.25rem' }}>
+              Выполнено
+            </div>
+            <div style={{ fontSize: '1.4rem', fontWeight: '600', color: '#34c759' }}>
+              {alreadyCompleted} <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{assignment.unit}</span>
+            </div>
           </div>
         </div>
 
-        {/* Контейнер-банка */}
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
-          <div style={{ flex: 1 }}>
+        {/* Основной слайдер */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '1.5rem', 
+          alignItems: 'center', 
+          marginBottom: '1.5rem',
+          padding: '1rem 0'
+        }}>
+          {/* Трек слайдера */}
+          <div style={{ flex: 1, position: 'relative' }}>
             <div 
               ref={containerRef}
               style={{
                 position: 'relative',
-                height: '300px',
+                height: '280px',
                 width: '100%',
-                border: '3px solid #333',
-                borderRadius: '10px',
-                background: '#f5f5f5',
+                background: 'rgba(120, 120, 128, 0.12)',
+                borderRadius: '16px',
                 cursor: 'ns-resize',
                 userSelect: 'none',
                 overflow: 'hidden',
-                touchAction: 'none', // Отключаем zoom и pan
+                touchAction: 'none',
                 WebkitUserSelect: 'none',
-                WebkitTouchCallout: 'none'
+                WebkitTouchCallout: 'none',
+                boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.08)'
               }}
               onMouseDown={handleMouseDown}
               onTouchStart={(e) => {
-                e.preventDefault(); // Предотвращаем стандартное поведение
+                e.preventDefault();
                 setIsDragging(true);
               }}
             >
-              {/* Заполнение */}
+              {/* Градиентное заполнение */}
               <div style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
                 right: 0,
                 height: `${percentage}%`,
-                background: 'linear-gradient(to top, #28a745, #5cb85c)',
-                transition: isDragging ? 'none' : 'height 0.3s ease',
-                borderRadius: '0 0 7px 7px'
+                background: 'linear-gradient(to top, #007aff, #5ac8fa)',
+                transition: isDragging ? 'none' : 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                borderRadius: '16px',
+                boxShadow: '0 -2px 12px rgba(0, 122, 255, 0.3)'
               }}>
-                {/* Волны */}
+                {/* Блик сверху */}
                 <div style={{
                   position: 'absolute',
-                  top: '-5px',
-                  left: 0,
-                  right: 0,
-                  height: '10px',
-                  background: 'rgba(255,255,255,0.3)',
-                  borderRadius: '50%'
+                  top: 0,
+                  left: '10%',
+                  right: '10%',
+                  height: '40%',
+                  background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent)',
+                  borderRadius: '16px',
+                  pointerEvents: 'none'
                 }}></div>
               </div>
 
-              {/* Метки на стенках */}
-              {[25, 50, 75, 100].map(mark => (
+              {/* Процентные метки */}
+              {[25, 50, 75].map(mark => (
                 <div key={mark} style={{
                   position: 'absolute',
-                  left: 0,
-                  right: 0,
+                  right: '110%',
                   bottom: `${mark}%`,
-                  height: '1px',
-                  background: '#999',
-                  display: 'flex',
-                  alignItems: 'center'
+                  transform: 'translateY(50%)',
+                  fontSize: '0.7rem',
+                  color: '#8e8e93',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
                 }}>
-                  <span style={{
-                    position: 'absolute',
-                    right: '105%',
-                    fontSize: '0.75rem',
-                    color: '#666'
-                  }}>
-                    {Math.round((mark / 100) * remaining)}
-                  </span>
+                  {Math.round((mark / 100) * remaining)} {assignment.unit}
                 </div>
               ))}
-
-              {/* Ползунок */}
-              <div style={{
-                position: 'absolute',
-                bottom: `${percentage}%`,
-                left: '-15px',
-                right: '-15px',
-                height: '30px',
-                transform: 'translateY(50%)',
-                pointerEvents: 'none'
-              }}>
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  background: '#007bff',
-                  border: '3px solid #fff',
-                  borderRadius: '15px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  fontSize: '0.9rem'
-                }}>
-                  {volume} {assignment.unit}
-                </div>
-              </div>
             </div>
-            <p style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
-              Двигайте ползунок вверх/вниз
-            </p>
           </div>
 
-          <div style={{ width: '120px' }}>
-            <div style={{ 
-              padding: '1rem', 
-              background: '#e3f2fd', 
-              borderRadius: '8px',
+          {/* Панель значения */}
+          <div style={{ 
+            width: '100px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.75rem'
+          }}>
+            <div style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #007aff, #5ac8fa)',
+              borderRadius: '16px',
+              padding: '1.25rem 0.75rem',
+              textAlign: 'center',
+              boxShadow: '0 8px 24px rgba(0, 122, 255, 0.25)'
+            }}>
+              <div style={{ 
+                fontSize: '0.7rem', 
+                color: 'rgba(255, 255, 255, 0.8)', 
+                fontWeight: '600',
+                marginBottom: '0.25rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Сегодня
+              </div>
+              <div style={{ 
+                fontSize: '2rem', 
+                fontWeight: '700', 
+                color: '#fff',
+                lineHeight: 1,
+                marginBottom: '0.25rem'
+              }}>
+                {volume}
+              </div>
+              <div style={{ 
+                fontSize: '0.75rem', 
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontWeight: '500'
+              }}>
+                {assignment.unit}
+              </div>
+            </div>
+            
+            <div style={{
+              width: '100%',
+              background: 'rgba(120, 120, 128, 0.12)',
+              borderRadius: '12px',
+              padding: '0.75rem',
               textAlign: 'center'
             }}>
-              <small style={{ color: '#666' }}>Сегодня</small>
-              <h2 style={{ margin: '0.5rem 0', color: '#007bff' }}>{volume}</h2>
-              <small style={{ color: '#666' }}>{assignment.unit}</small>
               <div style={{ 
-                marginTop: '0.5rem', 
-                paddingTop: '0.5rem', 
-                borderTop: '1px solid #bbb',
-                fontSize: '0.85rem'
+                fontSize: '1.5rem', 
+                fontWeight: '700', 
+                color: '#007aff'
               }}>
-                {Math.round((volume / remaining) * 100)}%
+                {Math.round(percentage)}%
+              </div>
+              <div style={{ 
+                fontSize: '0.65rem', 
+                color: '#8e8e93',
+                fontWeight: '500',
+                marginTop: '0.15rem'
+              }}>
+                от остатка
               </div>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        {/* Подсказка */}
+        <div style={{
+          textAlign: 'center',
+          fontSize: '0.8rem',
+          color: '#8e8e93',
+          marginBottom: '1rem',
+          fontWeight: '500'
+        }}>
+          Двигайте полоску для выбора объема
+        </div>
+
+        {/* Кнопки */}
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button 
-            className="btn btn-secondary" 
             onClick={onClose}
-            style={{ flex: 1 }}
+            style={{
+              flex: 1,
+              padding: '0.9rem',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'rgba(120, 120, 128, 0.12)',
+              color: '#007aff',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(120, 120, 128, 0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'rgba(120, 120, 128, 0.12)'}
           >
             Отмена
           </button>
           <button 
-            className="btn btn-success" 
             onClick={handleSubmit}
             disabled={volume <= 0}
-            style={{ flex: 2 }}
+            style={{
+              flex: 2,
+              padding: '0.9rem',
+              borderRadius: '12px',
+              border: 'none',
+              background: volume <= 0 ? 'rgba(120, 120, 128, 0.12)' : 'linear-gradient(135deg, #007aff, #5ac8fa)',
+              color: volume <= 0 ? '#8e8e93' : '#fff',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: volume <= 0 ? 'not-allowed' : 'pointer',
+              boxShadow: volume <= 0 ? 'none' : '0 4px 16px rgba(0, 122, 255, 0.3)',
+              transition: 'all 0.2s',
+              opacity: volume <= 0 ? 0.5 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (volume > 0) {
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(0, 122, 255, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (volume > 0) {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 16px rgba(0, 122, 255, 0.3)';
+              }
+            }}
           >
-            💾 Сохранить ({volume} {assignment.unit})
+            Сохранить {volume > 0 && `(${volume} ${assignment.unit})`}
           </button>
         </div>
       </div>
