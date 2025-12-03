@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function VolumeSlider({ assignment, onSubmit, onClose }) {
   const [volume, setVolume] = useState(0);
@@ -9,6 +9,14 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
   const alreadyCompleted = parseFloat(assignment.completed_so_far || 0);
   const remaining = maxVolume - alreadyCompleted;
   const percentage = (volume / remaining) * 100;
+
+  // Блокируем скролл body при монтировании
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
 
   const handleMouseDown = () => {
     setIsDragging(true);
@@ -32,6 +40,8 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
 
   const handleTouchMove = (e) => {
     if (!isDragging || !containerRef.current) return;
+    
+    e.preventDefault(); // Предотвращаем скролл страницы
     
     const touch = e.touches[0];
     const rect = containerRef.current.getBoundingClientRect();
@@ -62,8 +72,12 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
       onMouseUp={handleMouseUp}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleMouseUp}
+      style={{ 
+        touchAction: 'none', // Отключаем стандартные touch жесты
+        overscrollBehavior: 'contain' // Предотвращаем резиновый эффект
+      }}
     >
-      <div className="modal-content" style={{ maxWidth: '500px' }}>
+      <div className="modal-content" style={{ maxWidth: '500px', touchAction: 'none' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3>Отметить выполнение</h3>
           <button className="btn btn-small btn-secondary" onClick={onClose}>✕</button>
@@ -105,10 +119,16 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
                 background: '#f5f5f5',
                 cursor: 'ns-resize',
                 userSelect: 'none',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                touchAction: 'none', // Отключаем zoom и pan
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none'
               }}
               onMouseDown={handleMouseDown}
-              onTouchStart={() => setIsDragging(true)}
+              onTouchStart={(e) => {
+                e.preventDefault(); // Предотвращаем стандартное поведение
+                setIsDragging(true);
+              }}
             >
               {/* Заполнение */}
               <div style={{
