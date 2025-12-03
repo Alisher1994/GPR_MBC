@@ -113,7 +113,7 @@ export default function PlannerPageNew({ user }) {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('xmlFile', file);
     formData.append('userId', user.id);
 
     setLoading(true);
@@ -164,7 +164,7 @@ export default function PlannerPageNew({ user }) {
       if (!file) return;
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('xmlFile', file);
       formData.append('userId', user.id);
 
       setLoading(true);
