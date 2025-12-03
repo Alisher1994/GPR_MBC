@@ -1,0 +1,32 @@
+{
+  "name": "construction-tracking-mvp",
+  "version": "1.0.0",
+  "description": "MVP система учета строительных работ с интеграцией Primavera P6 через XML",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server/index.js",
+    "client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "node server/index.js",
+    "db:migrate": "node server/db/migrate.js"
+  },
+  "keywords": ["construction", "primavera", "tracking"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "multer": "^1.4.5-lts.1",
+    "xml2js": "^0.6.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "concurrently": "^8.2.2"
+  }
+}

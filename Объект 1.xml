@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectData>
+    <Object Name="Объект 1 - Жилой Комплекс">
+        
+        <Stage Name="Очередь 1 (Этап 1)">
+            
+            <Block Name="Блок А">
+                
+                <Floor Name="Этаж 1">
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-01-15" EndDate="2025-01-30" TotalVolume="500.00" CompletedVolume="500.00" Unit="м³"/>
+                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-02-01" EndDate="2025-02-10" TotalVolume="25" CompletedVolume="10" Unit="шт"/>
+                </Floor>
+                
+                <Floor Name="Этаж 2">
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-02-05" EndDate="2025-02-20" TotalVolume="500.00" CompletedVolume="0.00" Unit="м³"/>
+                    <WorkType Name="Монтаж оконных блоков" StartDate="2025-02-22" EndDate="2025-03-05" TotalVolume="25" CompletedVolume="0" Unit="шт"/>
+                </Floor>
+                
+            </Block>
+            
+            <Block Name="Блок Б">
+                
+                <Floor Name="Этаж 1">
+                    <WorkType Name="Кладка кирпича внешних стен" StartDate="2025-01-20" EndDate="2025-02-05" TotalVolume="450.00" CompletedVolume="450.00" Unit="м³"/>
+                </Floor>
+                
+            </Block>
+            
+        </Stage>
+        
+        <Stage Name="Очередь 2 (Этап 2)">
+             <Block Name="Блок В">
+                <Floor Name="Этаж 1">
+                    <WorkType Name="Устройство фундамента" StartDate="2025-03-01" EndDate="2025-03-15" TotalVolume="150.00" CompletedVolume="0.00" Unit="м³"/>
+                </Floor>
+            </Block>
+        </Stage>
+
+    </Object>
+</ProjectData>
