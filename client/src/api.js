@@ -44,7 +44,8 @@ export const foreman = {
   getPendingApprovals: (foremanId) => api.get(`/foreman/pending-approvals/${foremanId}`),
   approveWork: (completedWorkId, foremanId, status, adjustedVolume, notes) =>
     api.post('/foreman/approve-work', { completedWorkId, foremanId, status, adjustedVolume, notes }),
-  getMyAssignments: (foremanId) => api.get(`/foreman/my-assignments/${foremanId}`)
+  getMyAssignments: (foremanId) => api.get(`/foreman/my-assignments/${foremanId}`),
+  getSentAssignments: (foremanId) => api.get(`/foreman/sent-assignments/${foremanId}`)
 };
 
 export const subcontractor = {

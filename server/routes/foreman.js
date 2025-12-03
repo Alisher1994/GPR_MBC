@@ -237,4 +237,39 @@ router.get('/my-assignments/:foremanId', async (req, res) => {
   }
 });
 
+// Получить отправленные наряды прораба
+router.get('/sent-assignments/:foremanId', async (req, res) => {
+  try {
+    const { foremanId } = req.params;
+
+    const result = await pool.query(
+      `SELECT 
+         wa.*,
+         wi.work_type,
+         wi.stage,
+         wi.block,
+         wi.floor,
+         wi.unit,
+         wi.start_date,
+         wi.end_date,
+         u.username as subcontractor_name,
+         u.company_name,
+         COALESCE(SUM(cw.completed_volume), 0) as completed_volume
+       FROM work_assignments wa
+       JOIN work_items wi ON wa.work_item_id = wi.id
+       JOIN users u ON wa.subcontractor_id = u.id
+       LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status = 'approved'
+       WHERE wa.assigned_by = $1
+       GROUP BY wa.id, wi.id, u.id
+       ORDER BY wa.created_at DESC`,
+      [foremanId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения отправленных нарядов:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

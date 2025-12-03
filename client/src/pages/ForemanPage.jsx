@@ -6,14 +6,18 @@ export default function ForemanPage({ user }) {
   const [selectedObjectId, setSelectedObjectId] = useState('');
   const [upcomingWorks, setUpcomingWorks] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [sentAssignments, setSentAssignments] = useState([]);
   const [subcontractors, setSubcontractors] = useState([]);
-  const [activeTab, setActiveTab] = useState('works'); // 'works', 'approvals', 'my-assignments'
+  const [activeTab, setActiveTab] = useState('works');
   const [loading, setLoading] = useState(false);
+  const [expandedBlocks, setExpandedBlocks] = useState({});
+  const [expandedFloors, setExpandedFloors] = useState({});
 
   useEffect(() => {
     loadObjects();
     loadSubcontractors();
     loadPendingApprovals();
+    loadSentAssignments();
   }, []);
 
   const loadObjects = async () => {
@@ -57,23 +61,65 @@ export default function ForemanPage({ user }) {
     }
   };
 
-  const handleAssignWork = async (workItemId) => {
-    const selectedSubs = prompt('Введите ID субподрядчиков через запятую:');
-    if (!selectedSubs) return;
+  const loadSentAssignments = async () => {
+    try {
+      const response = await foreman.getSentAssignments(user.id);
+      setSentAssignments(response.data);
+    } catch (error) {
+      console.error('Ошибка загрузки отправленных нарядов:', error);
+    }
+  };
 
-    const subIds = selectedSubs.split(',').map(id => id.trim());
-    const volume = prompt('Введите объем для каждого субподрядчика:');
+  const toggleBlock = (blockName) => {
+    setExpandedBlocks(prev => ({ ...prev, [blockName]: !prev[blockName] }));
+  };
+
+  const toggleFloor = (key) => {
+    setExpandedFloors(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const groupWorksByStructure = (works) => {
+    const grouped = {};
+    works.forEach(work => {
+      const stage = work.stage || 'Без очереди';
+      const block = work.block || 'Без блока';
+      const floor = work.floor || 'Без этажа';
+      
+      if (!grouped[stage]) grouped[stage] = {};
+      if (!grouped[stage][block]) grouped[stage][block] = {};
+      if (!grouped[stage][block][floor]) grouped[stage][block][floor] = [];
+      
+      grouped[stage][block][floor].push(work);
+    });
+    return grouped;
+  };
+
+  const handleAssignWork = async (workItemId, workInfo) => {
+    const selectedSubId = prompt(
+      `Выберите субподрядчика (введите номер):\n\n${subcontractors.map((s, i) => `${i + 1}. ${s.username}${s.company_name ? ' (' + s.company_name + ')' : ''}`).join('\n')}`
+    );
+    
+    if (!selectedSubId) return;
+    
+    const subIndex = parseInt(selectedSubId) - 1;
+    if (subIndex < 0 || subIndex >= subcontractors.length) {
+      alert('Неверный номер субподрядчика!');
+      return;
+    }
+
+    const volume = prompt(`Введите объем работ для ${subcontractors[subIndex].username}:`);
     if (!volume) return;
 
-    const assignments = subIds.map(subId => ({
-      subcontractorId: parseInt(subId),
+    const assignments = [{
+      subcontractorId: subcontractors[subIndex].id,
       assignedVolume: parseFloat(volume)
-    }));
+    }];
 
     try {
       await foreman.assignWork(workItemId, assignments, user.id);
       alert('Работа успешно распределена!');
       loadUpcomingWorks();
+      loadSentAssignments();
     } catch (error) {
       alert('Ошибка: ' + (error.response?.data?.error || error.message));
     }
@@ -111,10 +157,16 @@ export default function ForemanPage({ user }) {
             Работы
           </button>
           <button
-            className={`btn btn-small ${activeTab === 'approvals' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveTab('approvals')}
+            className={`btn btn-small ${activeTab === 'incoming' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab('incoming')}
           >
             Входящие ({pendingApprovals.length})
+          </button>
+          <button
+            className={`btn btn-small ${activeTab === 'sent' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveTab('sent')}
+          >
+            Отправленные ({sentAssignments.length})
           </button>
         </div>
 
@@ -147,54 +199,89 @@ export default function ForemanPage({ user }) {
             {loading && <p className="loading">Загрузка...</p>}
 
             {upcomingWorks.length > 0 && (
-              <div style={{ overflowX: 'auto' }}>
+              <div>
                 <h3 className="mb-2">Работы на ближайшие 2 недели</h3>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Очередь</th>
-                      <th>Блок</th>
-                      <th>Этаж</th>
-                      <th>Вид работ</th>
-                      <th>Начало</th>
-                      <th>Окончание</th>
-                      <th>Объем</th>
-                      <th>Выполнено</th>
-                      <th>Назначений</th>
-                      <th>Действие</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {upcomingWorks.map((work) => (
-                      <tr key={work.id}>
-                        <td>{work.stage}</td>
-                        <td>{work.block}</td>
-                        <td>{work.floor}</td>
-                        <td>{work.work_type}</td>
-                        <td>{new Date(work.start_date).toLocaleDateString('ru-RU')}</td>
-                        <td>{new Date(work.end_date).toLocaleDateString('ru-RU')}</td>
-                        <td>{work.total_volume} {work.unit}</td>
-                        <td>{work.actual_completed} {work.unit}</td>
-                        <td>{work.assignments_count}</td>
-                        <td>
-                          <button
-                            className="btn btn-small btn-success"
-                            onClick={() => handleAssignWork(work.id)}
-                          >
-                            Распределить
-                          </button>
-                        </td>
-                      </tr>
+                {Object.entries(groupWorksByStructure(upcomingWorks)).map(([stage, blocks]) => (
+                  <div key={stage} style={{ marginBottom: '1rem' }}>
+                    <h4 style={{ background: '#e3f2fd', padding: '0.5rem', borderRadius: '4px' }}>{stage}</h4>
+                    {Object.entries(blocks).map(([block, floors]) => (
+                      <div key={block} style={{ marginLeft: '1rem', marginBottom: '0.5rem' }}>
+                        <div 
+                          onClick={() => toggleBlock(`${stage}-${block}`)}
+                          style={{ 
+                            background: '#f5f5f5', 
+                            padding: '0.5rem', 
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {expandedBlocks[`${stage}-${block}`] ? '▼' : '▶'} {block}
+                        </div>
+                        {expandedBlocks[`${stage}-${block}`] && Object.entries(floors).map(([floor, works]) => (
+                          <div key={floor} style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
+                            <div 
+                              onClick={() => toggleFloor(`${stage}-${block}-${floor}`)}
+                              style={{ 
+                                background: '#fafafa', 
+                                padding: '0.4rem', 
+                                cursor: 'pointer',
+                                borderRadius: '4px',
+                                fontWeight: '500'
+                              }}
+                            >
+                              {expandedFloors[`${stage}-${block}-${floor}`] ? '▼' : '▶'} {floor}
+                            </div>
+                            {expandedFloors[`${stage}-${block}-${floor}`] && (
+                              <div style={{ marginLeft: '1rem', marginTop: '0.5rem', overflowX: 'auto' }}>
+                                <table className="table">
+                                  <thead>
+                                    <tr>
+                                      <th>Вид работ</th>
+                                      <th>Начало</th>
+                                      <th>Окончание</th>
+                                      <th>Объем</th>
+                                      <th>Выполнено</th>
+                                      <th>Назначений</th>
+                                      <th>Действие</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {works.map((work) => (
+                                      <tr key={work.id}>
+                                        <td>{work.work_type}</td>
+                                        <td>{new Date(work.start_date).toLocaleDateString('ru-RU')}</td>
+                                        <td>{new Date(work.end_date).toLocaleDateString('ru-RU')}</td>
+                                        <td>{work.total_volume} {work.unit}</td>
+                                        <td>{work.actual_completed} {work.unit}</td>
+                                        <td>{work.assignments_count}</td>
+                                        <td>
+                                          <button
+                                            className="btn btn-small btn-success"
+                                            onClick={() => handleAssignWork(work.id, work)}
+                                          >
+                                            Распределить
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                ))}
               </div>
             )}
           </>
         )}
 
         {/* Вкладка "Входящие" */}
-        {activeTab === 'approvals' && (
+        {activeTab === 'incoming' && (
           <>
             <h3 className="mb-2">Выполненные объемы для проверки</h3>
             {pendingApprovals.length === 0 ? (
@@ -251,15 +338,72 @@ export default function ForemanPage({ user }) {
             )}
           </>
         )}
+
+        {/* Вкладка "Отправленные" */}
+        {activeTab === 'sent' && (
+          <>
+            <h3 className="mb-2">Отправленные наряды</h3>
+            {sentAssignments.length === 0 ? (
+              <div className="empty-state">
+                <h3>Нет отправленных нарядов</h3>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Субподрядчик</th>
+                      <th>Работа</th>
+                      <th>Блок/Этаж</th>
+                      <th>Дата назначения</th>
+                      <th>Назначено</th>
+                      <th>Выполнено</th>
+                      <th>Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sentAssignments.map((assignment) => (
+                      <tr key={assignment.id}>
+                        <td>
+                          {assignment.subcontractor_name}
+                          {assignment.company_name && <><br/><small>{assignment.company_name}</small></>}
+                        </td>
+                        <td>{assignment.work_type}</td>
+                        <td>{assignment.block} / {assignment.floor}</td>
+                        <td>{new Date(assignment.assigned_at).toLocaleDateString('ru-RU')}</td>
+                        <td>{assignment.assigned_volume} {assignment.unit}</td>
+                        <td>{assignment.completed_volume || 0} {assignment.unit}</td>
+                        <td>
+                          <span style={{
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            background: assignment.status === 'pending' ? '#fff3cd' : 
+                                       assignment.status === 'in_progress' ? '#cfe2ff' : '#d1e7dd',
+                            color: assignment.status === 'pending' ? '#856404' : 
+                                  assignment.status === 'in_progress' ? '#084298' : '#0f5132'
+                          }}>
+                            {assignment.status === 'pending' ? 'Ожидает' : 
+                             assignment.status === 'in_progress' ? 'В работе' : 'Завершено'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Список субподрядчиков для справки */}
       <div className="card">
         <h3 className="card-title">Доступные субподрядчики</h3>
         <div className="grid grid-3">
-          {subcontractors.map(sub => (
+          {subcontractors.map((sub, idx) => (
             <div key={sub.id} style={{ padding: '0.75rem', background: '#f8f9fa', borderRadius: '8px' }}>
-              <strong>ID: {sub.id}</strong> - {sub.username}
+              <strong>#{idx + 1}</strong> - {sub.username}
               {sub.company_name && <><br/><small>{sub.company_name}</small></>}
             </div>
           ))}
