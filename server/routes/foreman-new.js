@@ -49,14 +49,27 @@ router.get('/objects/:objectId/sections', async (req, res) => {
 router.get('/sections/:sectionId/works', async (req, res) => {
   try {
     const { sectionId } = req.params;
-    const { weeks = 2 } = req.query;
+    const { weeks } = req.query;
 
-    const today = new Date();
-    const futureDate = new Date();
-    futureDate.setDate(today.getDate() + (weeks * 7));
+    const params = [sectionId];
+    let dateFilterClause = '';
 
-    const result = await pool.query(
-      `SELECT 
+    const weeksNumber = weeks ? parseInt(weeks, 10) : null;
+    if (!Number.isNaN(weeksNumber) && weeksNumber > 0) {
+      const today = new Date();
+      const futureDate = new Date();
+      futureDate.setDate(today.getDate() + (weeksNumber * 7));
+
+      const futureParamIndex = params.length + 1;
+      const currentParamIndex = params.length + 2;
+      dateFilterClause = ` AND wi.start_date <= $${futureParamIndex} AND wi.end_date >= $${currentParamIndex}`;
+
+      params.push(futureDate.toISOString().split('T')[0]);
+      params.push(today.toISOString().split('T')[0]);
+    }
+
+    const query = `
+      SELECT 
          wi.*,
          COALESCE(SUM(cw.completed_volume), 0) as actual_completed,
          COUNT(DISTINCT wa.id) as assignments_count,
@@ -64,13 +77,11 @@ router.get('/sections/:sectionId/works', async (req, res) => {
        FROM work_items wi
        LEFT JOIN work_assignments wa ON wi.id = wa.work_item_id
        LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status = 'approved'
-       WHERE wi.section_id = $1
-         AND wi.start_date <= $2
-         AND wi.end_date >= $3
+       WHERE wi.section_id = $1${dateFilterClause}
        GROUP BY wi.id
-       ORDER BY wi.start_date, wi.floor, wi.work_type`,
-      [sectionId, futureDate.toISOString().split('T')[0], today.toISOString().split('T')[0]]
-    );
+       ORDER BY wi.start_date, wi.floor, wi.work_type`;
+
+    const result = await pool.query(query, params);
 
     res.json(result.rows);
   } catch (error) {

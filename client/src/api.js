@@ -56,8 +56,13 @@ export const foreman = {
   // Объекты и секции
   getObjects: () => api.get('/foreman/objects'),
   getObjectSections: (objectId) => api.get(`/foreman/objects/${objectId}/sections`),
-  getSectionWorks: (sectionId, weeks = 2) => 
-    api.get(`/foreman/sections/${sectionId}/works`, { params: { weeks } }),
+  getSectionWorks: (sectionId, weeks) => {
+    const params = {};
+    if (typeof weeks !== 'undefined' && weeks !== null) {
+      params.weeks = weeks;
+    }
+    return api.get(`/foreman/sections/${sectionId}/works`, { params });
+  },
   checkSectionUpdates: (sectionId, lastChecked) => 
     api.get(`/foreman/sections/${sectionId}/check-updates`, { params: { lastChecked } }),
   

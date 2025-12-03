@@ -61,7 +61,7 @@ export default function ForemanPageNew({ user }) {
     
     setLoading(true);
     try {
-      const response = await foreman.getSectionWorks(selectedSectionId, 2);
+      const response = await foreman.getSectionWorks(selectedSectionId);
       setWorks(response.data);
       setLastUpdate(new Date());
       setHasUpdates(false);
