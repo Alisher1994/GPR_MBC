@@ -33,7 +33,8 @@ export const planner = {
   getObjectDetails: (objectId) => api.get(`/planner/objects/${objectId}`),
   exportXML: (objectId) => api.get(`/planner/export/${objectId}`, {
     responseType: 'blob'
-  })
+  }),
+  deleteObject: (objectId) => api.delete(`/planner/objects/${objectId}`)
 };
 
 export const foreman = {

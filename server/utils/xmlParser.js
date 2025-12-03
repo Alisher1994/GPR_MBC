@@ -40,7 +40,8 @@ export async function parseXMLFile(filePath) {
             const startDate = new Date(workType.$.StartDate);
             const endDate = new Date(workType.$.EndDate);
             const totalVolume = parseFloat(workType.$.TotalVolume);
-            const completedVolume = parseFloat(workType.$.CompletedVolume);
+            // Всегда начинаем с нуля, игнорируем CompletedVolume из XML
+            const completedVolume = 0;
             
             // Вычисляем дневную норму
             const workDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) || 1;

@@ -203,4 +203,33 @@ router.get('/export/:objectId', async (req, res) => {
   }
 });
 
+// Удалить объект и все связанные данные
+router.delete('/objects/:id', async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    const { id } = req.params;
+
+    await client.query('BEGIN');
+
+    // Удаляем в правильном порядке из-за внешних ключей
+    await client.query('DELETE FROM completed_works WHERE assignment_id IN (SELECT id FROM work_assignments WHERE work_item_id IN (SELECT id FROM work_items WHERE object_id = $1))', [id]);
+    await client.query('DELETE FROM work_assignments WHERE work_item_id IN (SELECT id FROM work_items WHERE object_id = $1)', [id]);
+    await client.query('DELETE FROM work_items WHERE object_id = $1', [id]);
+    await client.query('DELETE FROM xml_files WHERE object_id = $1', [id]);
+    await client.query('DELETE FROM objects WHERE id = $1', [id]);
+
+    await client.query('COMMIT');
+
+    res.json({ success: true, message: 'Объект успешно удален' });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Ошибка удаления объекта:', error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;

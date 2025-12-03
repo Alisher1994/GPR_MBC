@@ -67,6 +67,23 @@ export default function PlannerPage({ user }) {
     }
   };
 
+  const handleDeleteObject = async (objectId, objectName) => {
+    if (!confirm(`Вы уверены, что хотите удалить объект "${objectName}"?\n\nЭто удалит все работы, назначения и выполненные объемы!`)) {
+      return;
+    }
+
+    try {
+      await planner.deleteObject(objectId);
+      alert('Объект успешно удален');
+      loadObjects();
+      if (selectedObject?.object.id === objectId) {
+        setSelectedObject(null);
+      }
+    } catch (error) {
+      alert('Ошибка удаления: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
   return (
     <div>
       <h2 className="mb-3">Панель плановика</h2>
@@ -127,6 +144,12 @@ export default function PlannerPage({ user }) {
                         onClick={() => handleExport(obj.id)}
                       >
                         Экспорт XML
+                      </button>
+                      <button
+                        className="btn btn-small btn-danger"
+                        onClick={() => handleDeleteObject(obj.id, obj.name)}
+                      >
+                        Удалить
                       </button>
                     </div>
                   </td>
