@@ -162,7 +162,7 @@ router.post('/assign-work', async (req, res) => {
       const result = await pool.query(
         `INSERT INTO work_assignments 
          (work_item_id, subcontractor_id, foreman_id, assigned_volume, assigned_at, status)
-         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, 'pending')
+         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, 'assigned')
          RETURNING *`,
         [workItemId, assignment.subcontractorId, foremanId, assignment.assignedVolume]
       );

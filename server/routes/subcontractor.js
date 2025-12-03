@@ -9,6 +9,14 @@ router.get('/my-assignments/:subcontractorId', async (req, res) => {
     const { subcontractorId } = req.params;
     const { status } = req.query; // фильтр по статусу
 
+    // Временная нормализация старых записей (после смены статусов)
+    await pool.query(
+      `UPDATE work_assignments
+       SET status = 'assigned', updated_at = CURRENT_TIMESTAMP
+       WHERE subcontractor_id = $1 AND status = 'pending'`,
+      [subcontractorId]
+    );
+
     let query = `
       SELECT 
         wa.*,

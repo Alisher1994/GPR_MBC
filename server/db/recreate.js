@@ -116,7 +116,7 @@ const recreateTables = async (retries = 5, delay = 3000) => {
             foreman_id INTEGER REFERENCES users(id),
             assigned_volume NUMERIC(12, 2) NOT NULL,
             assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'in_progress', 'completed')),
+            status VARCHAR(50) DEFAULT 'assigned' CHECK (status IN ('assigned', 'in_progress', 'completed', 'rejected')),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           )
