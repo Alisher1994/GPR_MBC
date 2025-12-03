@@ -223,7 +223,7 @@ export default function ForemanPage({ user }) {
                   className="btn btn-primary"
                   onClick={loadUpcomingWorks}
                   disabled={loading}
-                  style={{ marginBottom: 0, whiteSpace: 'nowrap' }}
+                  style={{ marginBottom: 0, whiteSpace: 'nowrap', flexShrink: 0, minWidth: 'auto' }}
                 >
                   Сформировать
                 </button>
