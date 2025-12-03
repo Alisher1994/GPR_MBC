@@ -21,6 +21,7 @@ export default function PlannerPageNew({ user }) {
   const [exporting, setExporting] = useState(null);
   const [showGanttModal, setShowGanttModal] = useState(false);
   const [ganttWorks, setGanttWorks] = useState([]);
+  const [ganttTasks, setGanttTasks] = useState([]);
   const [ganttLoading, setGanttLoading] = useState(false);
   const [ganttError, setGanttError] = useState(null);
 
@@ -110,17 +111,16 @@ export default function PlannerPageNew({ user }) {
   }, [showGanttModal]);
 
   useEffect(() => {
-    if (!showGanttModal || ganttLoading || ganttWorks.length === 0 || !ganttContainerRef.current) {
+    if (!showGanttModal || ganttLoading || ganttTasks.length === 0 || !ganttContainerRef.current) {
       return;
     }
 
-    const tasks = transformWorksToGanttTasks(ganttWorks);
-    if (tasks.length === 0) {
+    if (ganttTasks.length === 0) {
       return;
     }
 
     ganttContainerRef.current.innerHTML = '';
-    ganttInstanceRef.current = new Gantt(ganttContainerRef.current, tasks, {
+    ganttInstanceRef.current = new Gantt(ganttContainerRef.current, ganttTasks, {
       view_mode: 'Week',
       date_format: 'YYYY-MM-DD',
       bar_height: 26,
@@ -139,7 +139,7 @@ export default function PlannerPageNew({ user }) {
         `;
       }
     });
-  }, [showGanttModal, ganttWorks, ganttLoading]);
+  }, [showGanttModal, ganttTasks, ganttLoading]);
 
   const loadObjects = async () => {
     try {
@@ -182,10 +182,13 @@ export default function PlannerPageNew({ user }) {
     setGanttError(null);
     try {
       const response = await planner.getSectionWorks(selectedSection.id);
-      setGanttWorks(response.data || []);
+      const works = response.data || [];
+      setGanttWorks(works);
+      setGanttTasks(transformWorksToGanttTasks(works));
     } catch (error) {
       console.error('Ошибка загрузки данных для ганта:', error);
       setGanttError(error.response?.data?.error || 'Не удалось загрузить данные для диаграммы');
+      setGanttTasks([]);
     } finally {
       setGanttLoading(false);
     }
@@ -194,6 +197,7 @@ export default function PlannerPageNew({ user }) {
   const handleCloseGantt = () => {
     setShowGanttModal(false);
     setGanttWorks([]);
+    setGanttTasks([]);
     setGanttError(null);
   };
 
@@ -865,7 +869,7 @@ export default function PlannerPageNew({ user }) {
               <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
             ) : ganttError ? (
               <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
-            ) : ganttWorks.length === 0 ? (
+            ) : ganttTasks.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
                 Нет работ для построения графика. Загрузите XML и распределите задания.
               </div>
@@ -881,7 +885,23 @@ export default function PlannerPageNew({ user }) {
                     <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
                   </div>
                 </div>
-                <div className="gantt-chart-container" ref={ganttContainerRef}></div>
+                <div className="gantt-modal-board">
+                  <div className="gantt-modal-board__list">
+                    {ganttTasks.map((task) => (
+                      <div key={task.id} className="gantt-task-row">
+                        <div className="gantt-task-name">{task.name}</div>
+                        {task.details?.type && (
+                          <span className={`gantt-task-tag ${task.details.type === 'Факт' ? 'is-fact' : 'is-plan'}`}>
+                            {task.details.type}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="gantt-modal-board__chart">
+                    <div className="gantt-chart-container" ref={ganttContainerRef}></div>
+                  </div>
+                </div>
               </>
             )}
           </div>
