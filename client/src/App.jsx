@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Login from './components/Login';
 import PlannerPageNew from './pages/PlannerPageNew';
-import ForemanPage from './pages/ForemanPage';
+import ForemanPageNew from './pages/ForemanPageNew';
 import SubcontractorPage from './pages/SubcontractorPage';
 
 function App() {
@@ -39,7 +39,7 @@ function App() {
       case 'planner':
         return <PlannerPageNew user={user} />;
       case 'foreman':
-        return <ForemanPage user={user} />;
+        return <ForemanPageNew user={user} />;
       case 'subcontractor':
         return <SubcontractorPage user={user} />;
       default:

@@ -150,6 +150,11 @@ export default function KanbanBoard({ pendingApprovals, sentAssignments, onAppro
                     }}>
                       {item.work_type}
                     </h4>
+                    {item.object_name && item.section_name && (
+                      <div style={{ fontSize: '0.75rem', color: '#007aff', fontWeight: '600', marginBottom: '0.25rem' }}>
+                        {item.object_name} / {item.section_name}
+                      </div>
+                    )}
                     <div style={{ fontSize: '0.8rem', color: '#8e8e93', fontWeight: '500' }}>
                       {item.section} · {item.floor}
                     </div>

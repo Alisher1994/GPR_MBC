@@ -115,7 +115,7 @@ export default function SubcontractorPage({ user }) {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Объект</th>
+                      <th>Объект / Секция</th>
                       <th>Работа</th>
                       <th>Секция</th>
                       <th>Этаж</th>
@@ -135,7 +135,16 @@ export default function SubcontractorPage({ user }) {
 
                       return (
                         <tr key={assignment.id}>
-                          <td>{assignment.object_name}</td>
+                          <td>
+                            <div style={{ fontWeight: '600', color: '#1c1c1e' }}>
+                              {assignment.object_name}
+                            </div>
+                            {assignment.section_name && (
+                              <div style={{ fontSize: '0.85rem', color: '#007aff' }}>
+                                {assignment.section_name}
+                              </div>
+                            )}
+                          </td>
                           <td>{assignment.work_type}</td>
                           <td>{assignment.section}</td>
                           <td>{assignment.floor}</td>
