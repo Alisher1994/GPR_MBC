@@ -279,6 +279,33 @@ router.delete('/xml-files/:id', async (req, res) => {
   }
 });
 
+// Получить работы секции (для визуализации ганта)
+router.get('/sections/:sectionId/works', async (req, res) => {
+  try {
+    const { sectionId } = req.params;
+
+    const result = await pool.query(
+      `SELECT 
+         wi.*, 
+         COALESCE(SUM(cw.completed_volume), 0) AS actual_completed,
+         COALESCE(SUM(wa.assigned_volume), 0) AS assigned_total,
+         COUNT(DISTINCT wa.id) AS assignments_count
+       FROM work_items wi
+       LEFT JOIN work_assignments wa ON wi.id = wa.work_item_id
+       LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status = 'approved'
+       WHERE wi.section_id = $1
+       GROUP BY wi.id
+       ORDER BY wi.start_date, wi.floor, wi.work_type`,
+      [sectionId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения работ для ганта:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ========== ЭКСПОРТ ==========
 
 // Экспорт всех работ секции

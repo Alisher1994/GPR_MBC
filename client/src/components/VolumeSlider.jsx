@@ -3,12 +3,13 @@
 export default function VolumeSlider({ assignment, onSubmit, onClose }) {
   const [volume, setVolume] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [showHint, setShowHint] = useState(true);
   const containerRef = useRef(null);
 
   const maxVolume = parseFloat(assignment.assigned_volume);
   const alreadyCompleted = parseFloat(assignment.completed_so_far || 0);
   const remaining = maxVolume - alreadyCompleted;
-  const percentage = (volume / remaining) * 100;
+  const percentage = remaining > 0 ? (volume / remaining) * 100 : 0;
 
   // Блокируем скролл body при монтировании
   useEffect(() => {
@@ -18,8 +19,25 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
     };
   }, []);
 
-  const handleMouseDown = () => {
+  useEffect(() => {
+    if (volume > 0) {
+      setShowHint(false);
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      setShowHint(false);
+    }
+  }, [remaining]);
+
+  const beginInteraction = () => {
     setIsDragging(true);
+    setShowHint(false);
+  };
+
+  const handleMouseDown = () => {
+    beginInteraction();
   };
 
   const handleMouseUp = () => {
@@ -200,7 +218,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
               onMouseDown={handleMouseDown}
               onTouchStart={(e) => {
                 e.preventDefault();
-                setIsDragging(true);
+                beginInteraction();
               }}
             >
               {/* Градиентное заполнение */}
@@ -244,6 +262,13 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
                 </div>
               ))}
             </div>
+            {showHint && (
+              <div className="slider-hint">
+                <div className="slider-hint__finger"></div>
+                <div className="slider-hint__trail"></div>
+                <div className="slider-hint__text">Потяните вверх</div>
+              </div>
+            )}
           </div>
 
           {/* Панель значения */}

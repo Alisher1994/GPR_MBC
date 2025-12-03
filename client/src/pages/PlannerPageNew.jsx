@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { planner } from '../api';
+import Gantt from 'frappe-gantt';
+import '../styles/frappe-gantt.css';
 
 export default function PlannerPageNew({ user }) {
   const [objects, setObjects] = useState([]);
@@ -17,6 +19,13 @@ export default function PlannerPageNew({ user }) {
   const [newSectionNumber, setNewSectionNumber] = useState('');
   const [newSectionName, setNewSectionName] = useState('');
   const [exporting, setExporting] = useState(null);
+  const [showGanttModal, setShowGanttModal] = useState(false);
+  const [ganttWorks, setGanttWorks] = useState([]);
+  const [ganttLoading, setGanttLoading] = useState(false);
+  const [ganttError, setGanttError] = useState(null);
+
+  const ganttContainerRef = useRef(null);
+  const ganttInstanceRef = useRef(null);
 
   const columnContainerStyle = {
     background: '#fff',
@@ -25,7 +34,8 @@ export default function PlannerPageNew({ user }) {
     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
     display: 'flex',
     flexDirection: 'column',
-    minHeight: 'calc(100vh - 5rem)'
+    height: 'calc(100vh - 5.5rem)',
+    overflow: 'hidden'
   };
 
   const headerRowStyle = {
@@ -44,7 +54,8 @@ export default function PlannerPageNew({ user }) {
     flexDirection: 'column',
     gap: '0.75rem',
     flex: 1,
-    overflowY: 'auto'
+    overflowY: 'auto',
+    paddingRight: '0.25rem'
   };
 
   const emptyStateStyle = {
@@ -90,6 +101,46 @@ export default function PlannerPageNew({ user }) {
     }
   }, [selectedSection]);
 
+  useEffect(() => {
+    if (!showGanttModal) return () => {};
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showGanttModal]);
+
+  useEffect(() => {
+    if (!showGanttModal || ganttLoading || ganttWorks.length === 0 || !ganttContainerRef.current) {
+      return;
+    }
+
+    const tasks = transformWorksToGanttTasks(ganttWorks);
+    if (tasks.length === 0) {
+      return;
+    }
+
+    ganttContainerRef.current.innerHTML = '';
+    ganttInstanceRef.current = new Gantt(ganttContainerRef.current, tasks, {
+      view_mode: 'Week',
+      date_format: 'YYYY-MM-DD',
+      bar_height: 26,
+      padding: 18,
+      language: 'ru',
+      custom_popup_html: (task) => {
+        const details = task.details || {};
+        return `
+          <div class="gantt-popup">
+            <div class="gantt-popup__title">${task.name}</div>
+            <div class="gantt-popup__row"><span>Тип:</span><span>${details.type || '-'} </span></div>
+            <div class="gantt-popup__row"><span>Диапазон:</span><span>${details.dates || '-'} </span></div>
+            <div class="gantt-popup__row"><span>Объем:</span><span>${details.completed || '-'} / ${details.total || '-'} </span></div>
+            ${details.percent ? `<div class="gantt-popup__row"><span>Факт:</span><span>${details.percent}</span></div>` : ''}
+          </div>
+        `;
+      }
+    });
+  }, [showGanttModal, ganttWorks, ganttLoading]);
+
   const loadObjects = async () => {
     try {
       setError(null);
@@ -119,6 +170,31 @@ export default function PlannerPageNew({ user }) {
       console.error('Ошибка загрузки файлов:', error);
       alert('Ошибка загрузки файлов');
     }
+  };
+
+  const handleShowGantt = async () => {
+    if (!selectedSection) {
+      alert('Выберите секцию для отображения графика');
+      return;
+    }
+    setShowGanttModal(true);
+    setGanttLoading(true);
+    setGanttError(null);
+    try {
+      const response = await planner.getSectionWorks(selectedSection.id);
+      setGanttWorks(response.data || []);
+    } catch (error) {
+      console.error('Ошибка загрузки данных для ганта:', error);
+      setGanttError(error.response?.data?.error || 'Не удалось загрузить данные для диаграммы');
+    } finally {
+      setGanttLoading(false);
+    }
+  };
+
+  const handleCloseGantt = () => {
+    setShowGanttModal(false);
+    setGanttWorks([]);
+    setGanttError(null);
   };
 
   const handleCreateObject = async () => {
@@ -300,6 +376,68 @@ export default function PlannerPageNew({ user }) {
     });
   };
 
+  const formatDateForGantt = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toISOString().split('T')[0];
+  };
+
+  const calculateActualEndDate = (work, percent) => {
+    const start = new Date(work.start_date);
+    const end = new Date(work.end_date);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || percent <= 0) {
+      return formatDateForGantt(work.start_date) || formatDateForGantt(new Date());
+    }
+    const duration = Math.max(end.getTime() - start.getTime(), 0);
+    const minDuration = 24 * 60 * 60 * 1000;
+    const actualDuration = Math.max(minDuration, duration * (percent / 100));
+    const actualEnd = new Date(start.getTime() + actualDuration);
+    return actualEnd.toISOString().split('T')[0];
+  };
+
+  const transformWorksToGanttTasks = (works) => {
+    return works.flatMap((work) => {
+      const start = formatDateForGantt(work.start_date) || formatDateForGantt(new Date());
+      const end = formatDateForGantt(work.end_date) || start;
+      const total = parseFloat(work.total_volume) || 0;
+      const actual = parseFloat(work.actual_completed) || 0;
+      const progress = total > 0 ? Math.min(100, Math.round((actual / total) * 100)) : 0;
+      const planTask = {
+        id: `plan-${work.id}`,
+        name: `${work.work_type} · план` + (work.floor ? ` · ${work.floor}` : ''),
+        start,
+        end,
+        progress: 100,
+        custom_class: 'gantt-plan-bar',
+        details: {
+          type: 'План',
+          total: `${total} ${work.unit}`,
+          completed: `${actual} ${work.unit}`,
+          dates: `${start} → ${end}`
+        }
+      };
+
+      const actualTask = {
+        id: `fact-${work.id}`,
+        name: `${work.work_type} · факт` + (work.floor ? ` · ${work.floor}` : ''),
+        start,
+        end: calculateActualEndDate(work, progress),
+        progress,
+        custom_class: 'gantt-actual-bar',
+        details: {
+          type: 'Факт',
+          total: `${total} ${work.unit}`,
+          completed: `${actual} ${work.unit}`,
+          dates: `${start} → ${end}`,
+          percent: `${progress}%`
+        }
+      };
+
+      return [planTask, actualTask];
+    });
+  };
+
   return (
     <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
@@ -324,7 +462,7 @@ export default function PlannerPageNew({ user }) {
           gridTemplateColumns: '320px 320px 1fr', 
           gap: '1.5rem',
           alignItems: 'stretch',
-          minHeight: 'calc(100vh - 4rem)'
+          height: 'calc(100vh - 4rem)'
         }}>
           
           {/* КОЛОНКА 1: ОБЪЕКТЫ */}
@@ -523,6 +661,22 @@ export default function PlannerPageNew({ user }) {
                 {selectedSection && (
                   <>
                     <button
+                      onClick={handleShowGantt}
+                      disabled={ganttLoading}
+                      style={{
+                        padding: '0.5rem 0.9rem',
+                        borderRadius: '10px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        background: '#fff',
+                        color: '#1c1c1e',
+                        cursor: ganttLoading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {ganttLoading ? 'График...' : 'График'}
+                    </button>
+                    <button
                       onClick={() => handleExportSection('full')}
                       disabled={exporting !== null}
                       style={{
@@ -679,6 +833,60 @@ export default function PlannerPageNew({ user }) {
           </div>
         </div>
       </div>
+
+      {showGanttModal && (
+        <div className="modal-overlay" style={{ zIndex: 1200 }}>
+          <div className="modal-content" style={{ maxWidth: '1100px', width: '95%', borderRadius: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', gap: '1rem' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>График секции {selectedSection ? selectedSection.section_number : ''}</h3>
+                {selectedObject && selectedSection && (
+                  <p style={{ margin: '0.25rem 0 0 0', color: '#8e8e93', fontSize: '0.9rem' }}>
+                    {selectedObject.name} · {selectedSection.section_name}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleCloseGantt}
+                style={{
+                  border: 'none',
+                  background: 'rgba(142,142,147,0.16)',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {ganttLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
+            ) : ganttError ? (
+              <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
+            ) : ganttWorks.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
+                Нет работ для построения графика. Загрузите XML и распределите задания.
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#dbeafe', border: '1px solid #93c5fd' }}></span>
+                    <span style={{ fontSize: '0.85rem', color: '#525252' }}>План</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#34c759' }}></span>
+                    <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
+                  </div>
+                </div>
+                <div className="gantt-chart-container" ref={ganttContainerRef}></div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно: Создание объекта */}
       {showObjectModal && (

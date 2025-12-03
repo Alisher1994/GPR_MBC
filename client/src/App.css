@@ -345,3 +345,88 @@ body.modal-open {
   overscroll-behavior: contain; /* Предотвращаем резиновый эффект */
   -webkit-overflow-scrolling: touch;
 }
+
+.gantt-chart-container {
+  width: 100%;
+  min-height: 420px;
+  overflow: auto;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 0.5rem;
+  background: #fff;
+}
+
+.gantt-plan-bar .bar {
+  fill: #dbeafe;
+  stroke: #93c5fd;
+}
+
+.gantt-actual-bar .bar {
+  fill: #34c759;
+  stroke: #2aae4e;
+}
+
+.gantt-popup {
+  background: #fff;
+  padding: 0.75rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+  min-width: 220px;
+}
+
+.gantt-popup__title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.gantt-popup__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.slider-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  animation: sliderHint 2.8s ease-in-out infinite;
+}
+
+.slider-hint__finger {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0,0,0,0.2);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.slider-hint__trail {
+  width: 6px;
+  height: 50px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(0,122,255,0.8), rgba(0,122,255,0));
+}
+
+.slider-hint__text {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #005ac1;
+}
+
+@keyframes sliderHint {
+  0% { transform: translate(-50%, 40px); opacity: 0; }
+  10% { opacity: 1; }
+  45% { transform: translate(-50%, -60px); opacity: 1; }
+  75% { transform: translate(-50%, 20px); opacity: 0.8; }
+  100% { transform: translate(-50%, 40px); opacity: 0; }
+}

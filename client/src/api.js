@@ -42,6 +42,7 @@ export const planner = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   deleteXmlFile: (fileId) => api.delete(`/planner/xml-files/${fileId}`),
+  getSectionWorks: (sectionId) => api.get(`/planner/sections/${sectionId}/works`),
   
   // Экспорт
   exportSection: (sectionId) => api.get(`/planner/sections/${sectionId}/export`, {
