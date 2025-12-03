@@ -249,7 +249,7 @@ router.post('/sections/:sectionId/upload-xml', upload.single('xmlFile'), async (
     res.status(201).json({
       message: 'XML файл успешно загружен',
       file: xmlFileResult.rows[0],
-      itemsCount: parsedData.length
+      itemsCount: workItems.length
     });
 
   } catch (error) {

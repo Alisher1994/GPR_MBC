@@ -184,7 +184,7 @@ export default function PlannerPageNew({ user }) {
     if (!confirm('Удалить файл?')) return;
 
     try {
-      await planner.deleteSectionXmlFile(fileId);
+      await planner.deleteXmlFile(fileId);
       loadXmlFiles(selectedSection.id);
     } catch (error) {
       alert('Ошибка удаления файла');
