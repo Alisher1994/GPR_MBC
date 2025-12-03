@@ -595,7 +595,7 @@ export default function PlannerPageNew({ user }) {
                                        file.status === 'replaced' ? '#ff9500' : '#ff3b30',
                             color: '#fff'
                           }}>
-                            {file.status === 'active' ? '✓ Активен' : 
+                            {file.status === 'active' ? 'Активен' : 
                              file.status === 'replaced' ? 'Заменён' : 'Удалён'}
                           </span>
                         </td>
