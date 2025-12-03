@@ -68,7 +68,7 @@ router.get('/sections/:sectionId/works', async (req, res) => {
          AND wi.start_date <= $2
          AND wi.end_date >= $3
        GROUP BY wi.id
-       ORDER BY wi.start_date, wi.stage, wi.section, wi.floor`,
+       ORDER BY wi.start_date, wi.floor, wi.work_type`,
       [sectionId, futureDate.toISOString().split('T')[0], today.toISOString().split('T')[0]]
     );
 
@@ -178,10 +178,8 @@ router.get('/pending-approvals/:foremanId', async (req, res) => {
       `SELECT 
          cw.*,
          wi.work_type,
-         wi.section,
          wi.floor,
          wi.unit,
-         wi.stage,
          u.username as subcontractor_name,
          u.company_name,
          wa.assigned_volume,
@@ -214,10 +212,8 @@ router.get('/sent-assignments/:foremanId', async (req, res) => {
       `SELECT 
          wa.*,
          wi.work_type,
-         wi.section,
          wi.floor,
          wi.unit,
-         wi.stage,
          wi.total_volume,
          u.username as subcontractor_name,
          u.company_name,

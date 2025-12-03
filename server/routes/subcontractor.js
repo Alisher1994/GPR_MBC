@@ -13,8 +13,6 @@ router.get('/my-assignments/:subcontractorId', async (req, res) => {
       SELECT 
         wa.*,
         wi.work_type,
-        wi.stage,
-        wi.section,
         wi.floor,
         wi.unit,
         wi.daily_target,
@@ -136,8 +134,6 @@ router.get('/work-history/:subcontractorId', async (req, res) => {
         cw.*,
         wa.assigned_volume,
         wi.work_type,
-        wi.stage,
-        wi.section,
         wi.floor,
         wi.unit,
         o.name as object_name,
@@ -145,7 +141,8 @@ router.get('/work-history/:subcontractorId', async (req, res) => {
       FROM completed_works cw
       JOIN work_assignments wa ON cw.assignment_id = wa.id
       JOIN work_items wi ON wa.work_item_id = wi.id
-      JOIN objects o ON wi.object_id = o.id
+      JOIN sections s ON wi.section_id = s.id
+      JOIN objects o ON s.object_id = o.id
       LEFT JOIN users u ON cw.verified_by = u.id
       WHERE wa.subcontractor_id = $1
     `;
