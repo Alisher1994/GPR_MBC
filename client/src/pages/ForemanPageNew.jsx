@@ -144,6 +144,23 @@ export default function ForemanPageNew({ user }) {
     setExpandedFloors(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const ArrowIcon = ({ direction = 'right', size = 18 }) => {
+    if (direction === 'down') {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14" />
+          <path d="m19 12-7 7-7-7" />
+        </svg>
+      );
+    }
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    );
+  };
+
   const groupWorksByStructure = (works) => {
     const grouped = {};
     works.forEach(work => {
@@ -320,7 +337,7 @@ export default function ForemanPageNew({ user }) {
               </div>
 
               {/* Кнопка обновить */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', flex: '0 0 auto' }}>
                 <button
                   className="btn btn-primary"
                   onClick={loadWorks}
@@ -336,7 +353,7 @@ export default function ForemanPageNew({ user }) {
                   {hasUpdates ? '🔄 Есть обновления!' : '🔄 Обновить'}
                 </button>
                 {selectedSectionId && lastUpdate && !hasUpdates && (
-                  <span style={{ fontSize: '0.75rem', color: '#8e8e93', whiteSpace: 'nowrap', alignSelf: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#8e8e93', whiteSpace: 'nowrap', alignSelf: 'center', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     Обновлено {new Date(lastUpdate).toLocaleTimeString('ru-RU')}
                   </span>
                 )}
@@ -355,7 +372,7 @@ export default function ForemanPageNew({ user }) {
                     <h4 style={{ background: '#e3f2fd', padding: '0.5rem', borderRadius: '4px' }}>{stage}</h4>
                     {Object.entries(sections).map(([section, floors]) => (
                       <div key={section} style={{ marginLeft: '1rem', marginBottom: '0.5rem' }}>
-                        <div 
+                        <button 
                           onClick={() => toggleSection(`${stage}-${section}`)}
                           style={{ 
                             background: '#f5f5f5', 
@@ -363,14 +380,21 @@ export default function ForemanPageNew({ user }) {
                             cursor: 'pointer',
                             borderRadius: '4px',
                             fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.3s ease',
+                            border: 'none',
+                            width: '100%',
+                            textAlign: 'left',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem'
                           }}
                         >
-                          {expandedSections[`${stage}-${section}`] ? '▼' : '▶'} {section}
-                        </div>
+                          <ArrowIcon direction={expandedSections[`${stage}-${section}`] ? 'down' : 'right'} />
+                          {section}
+                        </button>
                         {expandedSections[`${stage}-${section}`] && Object.entries(floors).map(([floor, works]) => (
                           <div key={floor} style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
-                            <div 
+                            <button 
                               onClick={() => toggleFloor(`${stage}-${section}-${floor}`)}
                               style={{ 
                                 background: '#fafafa', 
@@ -378,11 +402,18 @@ export default function ForemanPageNew({ user }) {
                                 cursor: 'pointer',
                                 borderRadius: '4px',
                                 fontWeight: '500',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                border: 'none',
+                                width: '100%',
+                                textAlign: 'left',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.35rem'
                               }}
                             >
-                              {expandedFloors[`${stage}-${section}-${floor}`] ? '▼' : '▶'} {floor}
-                            </div>
+                              <ArrowIcon direction={expandedFloors[`${stage}-${section}-${floor}`] ? 'down' : 'right'} />
+                              {floor}
+                            </button>
                             {expandedFloors[`${stage}-${section}-${floor}`] && (
                               <div style={{ marginLeft: '1rem', marginTop: '0.5rem', overflowX: 'auto' }}>
                                 <table className="table">
@@ -423,7 +454,7 @@ export default function ForemanPageNew({ user }) {
                                                 className="btn btn-small btn-success"
                                                 onClick={() => handleAssignWork(work.id, work)}
                                               >
-                                                Распределить
+                                                Назначить
                                               </button>
                                             )}
                                           </td>
