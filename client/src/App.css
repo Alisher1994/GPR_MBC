@@ -130,8 +130,7 @@ body.modal-open {
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   border-radius: 24px;
   padding: 2.5rem;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);

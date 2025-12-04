@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../api';
 
-// Галерея проектов
+// Галерея проектов MBC
 const projects = [
   {
     id: 1,
     name: 'ЖК Tabiat Residence',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80',
+    image: 'https://mbc.uz/storage/projects/8ad929b1-a5d7-4294-8501-811d77743831.webp',
     description: 'Современный жилой комплекс с уникальной архитектурой'
   },
   {
     id: 2,
     name: 'ЖК Regnum Plaza',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80',
+    image: 'https://mbc.uz/storage/projects/4c351c1d-7754-4222-beb8-1028bd5c1a8c.webp',
     description: 'Премиальный комплекс в центре города'
   },
   {
     id: 3,
     name: 'ЖК Saadiyat',
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80',
+    image: 'https://mbc.uz/storage/projects/1390f5c8-43d4-4001-be28-a8f2206d3190.webp',
     description: 'Остров счастья — место, где счастливая жизнь'
+  },
+  {
+    id: 4,
+    name: 'Center One',
+    image: 'https://mbc.uz/storage/archs/57e245d5-0883-4af2-9b50-ead7ddb72586.webp',
+    description: 'Бизнес-центр нового поколения'
   }
 ];
 
