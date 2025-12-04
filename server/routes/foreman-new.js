@@ -216,12 +216,14 @@ router.get('/pending-approvals/:foremanId', async (req, res) => {
          u.company_name,
          wa.assigned_volume,
          s.section_name,
+         q.queue_name,
          o.name as object_name
        FROM completed_works cw
        JOIN work_assignments wa ON cw.assignment_id = wa.id
        JOIN work_items wi ON wa.work_item_id = wi.id
        JOIN sections s ON wi.section_id = s.id
-       JOIN objects o ON s.object_id = o.id
+       JOIN queues q ON s.queue_id = q.id
+       JOIN objects o ON q.object_id = o.id
        JOIN users u ON wa.subcontractor_id = u.id
       WHERE wa.foreman_id = $1 AND cw.status = 'submitted'
        ORDER BY cw.work_date DESC`,
@@ -250,12 +252,14 @@ router.get('/rejected-works/:foremanId', async (req, res) => {
          u.company_name,
          wa.assigned_volume,
          s.section_name,
+         q.queue_name,
          o.name as object_name
        FROM completed_works cw
        JOIN work_assignments wa ON cw.assignment_id = wa.id
        JOIN work_items wi ON wa.work_item_id = wi.id
        JOIN sections s ON wi.section_id = s.id
-       JOIN objects o ON s.object_id = o.id
+       JOIN queues q ON s.queue_id = q.id
+       JOIN objects o ON q.object_id = o.id
        JOIN users u ON wa.subcontractor_id = u.id
        WHERE wa.foreman_id = $1 AND cw.status = 'rejected'
        ORDER BY cw.updated_at DESC`,
@@ -285,15 +289,17 @@ router.get('/sent-assignments/:foremanId', async (req, res) => {
          u.company_name,
          COALESCE(SUM(cw.completed_volume), 0) as completed_volume,
          s.section_name,
+         q.queue_name,
          o.name as object_name
        FROM work_assignments wa
        JOIN work_items wi ON wa.work_item_id = wi.id
        JOIN sections s ON wi.section_id = s.id
-       JOIN objects o ON s.object_id = o.id
+       JOIN queues q ON s.queue_id = q.id
+       JOIN objects o ON q.object_id = o.id
        JOIN users u ON wa.subcontractor_id = u.id
        LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status = 'approved'
        WHERE wa.foreman_id = $1
-       GROUP BY wa.id, wi.id, u.id, s.id, o.id
+       GROUP BY wa.id, wi.id, u.id, s.id, q.id, o.id
        ORDER BY wa.assigned_at DESC`,
       [foremanId]
     );

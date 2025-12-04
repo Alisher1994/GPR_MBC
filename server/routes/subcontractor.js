@@ -27,12 +27,14 @@ router.get('/my-assignments/:subcontractorId', async (req, res) => {
         wi.start_date,
         wi.end_date,
         o.name as object_name,
+        q.queue_name,
         s.section_name,
         COALESCE(SUM(cw.completed_volume), 0) as completed_so_far
       FROM work_assignments wa
       JOIN work_items wi ON wa.work_item_id = wi.id
       JOIN sections s ON wi.section_id = s.id
-      JOIN objects o ON s.object_id = o.id
+      JOIN queues q ON s.queue_id = q.id
+      JOIN objects o ON q.object_id = o.id
       LEFT JOIN completed_works cw ON wa.id = cw.assignment_id AND cw.status IN ('submitted', 'approved')
       WHERE wa.subcontractor_id = $1
     `;
@@ -45,7 +47,7 @@ router.get('/my-assignments/:subcontractorId', async (req, res) => {
     }
 
     query += `
-      GROUP BY wa.id, wi.id, o.id, s.id
+      GROUP BY wa.id, wi.id, o.id, q.id, s.id
       ORDER BY wi.start_date ASC, wa.created_at DESC
     `;
 
@@ -145,12 +147,14 @@ router.get('/work-history/:subcontractorId', async (req, res) => {
         wi.floor,
         wi.unit,
         o.name as object_name,
+        q.queue_name,
         u.username as verified_by_name
       FROM completed_works cw
       JOIN work_assignments wa ON cw.assignment_id = wa.id
       JOIN work_items wi ON wa.work_item_id = wi.id
       JOIN sections s ON wi.section_id = s.id
-      JOIN objects o ON s.object_id = o.id
+      JOIN queues q ON s.queue_id = q.id
+      JOIN objects o ON q.object_id = o.id
       LEFT JOIN users u ON cw.verified_by = u.id
       WHERE wa.subcontractor_id = $1
     `;
