@@ -367,9 +367,6 @@ export default function PlannerPageNew({ user }) {
     <div style={pageStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-          Планировщик ГПР
-        </h1>
         {error && (
           <div style={{ color: '#ff3b30', fontSize: '0.9rem' }}>
             {error}

@@ -3,15 +3,15 @@ import pool from '../db/pool.js';
 
 const router = express.Router();
 
-// Получить объекты с секциями
+// Получить объекты с очередями
 router.get('/objects', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
         o.*,
-        COUNT(DISTINCT s.id) as sections_count
+        COUNT(DISTINCT q.id) as queues_count
       FROM objects o
-      LEFT JOIN sections s ON o.id = s.object_id
+      LEFT JOIN queues q ON o.id = q.object_id
       GROUP BY o.id
       ORDER BY o.name
     `);
@@ -22,28 +22,49 @@ router.get('/objects', async (req, res) => {
   }
 });
 
-// Получить секции объекта
-router.get('/objects/:objectId/sections', async (req, res) => {
+// Получить очереди объекта
+router.get('/objects/:objectId/queues', async (req, res) => {
   try {
     const { objectId } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        q.*,
+        COUNT(DISTINCT s.id) as sections_count
+      FROM queues q
+      LEFT JOIN sections s ON q.id = s.queue_id
+      WHERE q.object_id = $1
+      GROUP BY q.id
+      ORDER BY q.queue_number
+    `, [objectId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения очередей:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
+// Получить секции очереди
+router.get('/queues/:queueId/sections', async (req, res) => {
+  try {
+    const { queueId } = req.params;
     const result = await pool.query(`
       SELECT 
         s.*,
-        MAX(xf.uploaded_at) as last_updated
+        COUNT(DISTINCT wi.id) as works_count
       FROM sections s
-      LEFT JOIN xml_files xf ON s.id = xf.section_id AND xf.status = 'active'
-      WHERE s.object_id = $1
+      LEFT JOIN work_items wi ON s.id = wi.section_id
+      WHERE s.queue_id = $1
       GROUP BY s.id
       ORDER BY s.section_number
-    `, [objectId]);
-
+    `, [queueId]);
     res.json(result.rows);
   } catch (error) {
     console.error('Ошибка получения секций:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 // Получить работы секции (для текущего периода)
 router.get('/sections/:sectionId/works', async (req, res) => {
