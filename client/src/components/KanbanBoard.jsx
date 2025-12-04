@@ -1,4 +1,4 @@
-﻿export default function KanbanBoard({ pendingApprovals, sentAssignments, rejectedWorks, onApprove, onReject }) {
+﻿export default function KanbanBoard({ pendingApprovals = [], sentAssignments = [], rejectedWorks = [], onApprove, onReject }) {
   const assigned = sentAssignments.filter(item => item.status === 'assigned');
   const inProgress = sentAssignments.filter(item => item.status === 'in_progress');
   const confirmed = sentAssignments.filter(item => item.status === 'completed');

@@ -386,8 +386,8 @@ export default function ForemanPageNew({ user }) {
         {activeTab === 'kanban' && (
           <KanbanBoard
             pendingApprovals={pendingApprovals}
-            confirmed={sentAssignments}
-            rejected={rejectedWorks}
+            sentAssignments={sentAssignments}
+            rejectedWorks={rejectedWorks}
             onApprove={handleApproveWork}
           />
         )}
