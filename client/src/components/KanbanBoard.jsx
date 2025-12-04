@@ -171,7 +171,7 @@
       </div>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button
-          onClick={() => onApprove(item.id)}
+          onClick={() => onApprove(item.id, 'approved', item.completed_volume, null)}
           style={{
             flex: 1,
             padding: '0.6rem',
@@ -186,7 +186,7 @@
           ✓ Одобрить
         </button>
         <button
-          onClick={() => onReject(item.id)}
+          onClick={() => onApprove(item.id, 'rejected', null, 'Отклонено прорабом')}
           style={{
             flex: 1,
             padding: '0.6rem',
