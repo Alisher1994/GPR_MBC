@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { foreman, planner, auth } from '../api';
 import KanbanBoard from '../components/KanbanBoard';
 
+const foremanTabs = [
+  { id: 'works', label: 'Работы' },
+  { id: 'kanban', label: 'Выполнения' },
+  { id: 'issues', label: 'Список замечаний' }
+];
+
 export default function ForemanPageNew({ user }) {
   const [objects, setObjects] = useState([]);
   const [selectedObjectId, setSelectedObjectId] = useState('');
@@ -240,61 +246,33 @@ export default function ForemanPageNew({ user }) {
 
   return (
     <div>
-      <h2 className="mb-3">Панель прораба</h2>
-
-      {/* Табы */}
-      <div className="card" style={{ position: 'sticky', top: '70px', zIndex: 50, background: '#fff', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', borderBottom: '2px solid #e5e5ea' }}>
+      <div className="page-tabs">
+        {foremanTabs.map((tab) => (
           <button
-            onClick={() => setActiveTab('works')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: 'transparent',
-              fontSize: '1rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              color: activeTab === 'works' ? '#007aff' : '#8e8e93',
-              borderBottom: activeTab === 'works' ? '3px solid #007aff' : '3px solid transparent',
-              marginBottom: '-2px',
-              transition: 'all 0.2s',
-              minWidth: '140px'
-            }}
+            key={tab.id}
+            className={`page-tabs__button ${activeTab === tab.id ? 'page-tabs__button--active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+            type="button"
           >
-            📋 Работы
-          </button>
-          <button
-            onClick={() => setActiveTab('kanban')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: 'transparent',
-              fontSize: '1rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              color: activeTab === 'kanban' ? '#007aff' : '#8e8e93',
-              borderBottom: activeTab === 'kanban' ? '3px solid #007aff' : '3px solid transparent',
-              marginBottom: '-2px',
-              transition: 'all 0.2s',
-              minWidth: '140px'
-            }}
-          >
-            📊 Выполнения
-            {(pendingApprovals.length + sentAssignments.length) > 0 && (
+            {tab.label}
+            {tab.id === 'kanban' && (pendingApprovals.length + sentAssignments.length) > 0 && (
               <span style={{
-                marginLeft: '0.5rem',
+                marginLeft: '0.4rem',
                 background: '#ff3b30',
                 color: '#fff',
                 borderRadius: '10px',
-                padding: '0.15rem 0.5rem',
-                fontSize: '0.75rem',
+                padding: '0.05rem 0.45rem',
+                fontSize: '0.7rem',
                 fontWeight: '700'
               }}>
                 {pendingApprovals.length + sentAssignments.length}
               </span>
             )}
           </button>
-        </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ position: 'sticky', top: '70px', zIndex: 50, background: '#fff', marginBottom: '1rem' }}>
 
         {/* Вкладка "Работы" */}
         {activeTab === 'works' && (
@@ -503,6 +481,13 @@ export default function ForemanPageNew({ user }) {
             onApprove={(id) => handleApproveWork(id, true)}
             onReject={(id) => handleApproveWork(id, false)}
           />
+        )}
+
+        {activeTab === 'issues' && (
+          <div className="empty-state">
+            <h3>Список замечаний пока пуст</h3>
+            <p style={{ color: '#8e8e93', marginTop: '0.5rem' }}>Скоро здесь появится реестр замечаний.</p>
+          </div>
         )}
       </div>
     </div>

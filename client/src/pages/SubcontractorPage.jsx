@@ -2,10 +2,15 @@
 import { subcontractor } from '../api';
 import VolumeSlider from '../components/VolumeSlider';
 
+const subcontractorTabs = [
+  { id: 'assignments', label: 'Наряды' },
+  { id: 'issues', label: 'Список замечаний' }
+];
+
 export default function SubcontractorPage({ user }) {
   const [assignments, setAssignments] = useState([]);
   const [statistics, setStatistics] = useState(null);
-  const [activeTab, setActiveTab] = useState('assignments'); // 'assignments', 'history'
+  const [activeTab, setActiveTab] = useState('assignments');
   const [loading, setLoading] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
@@ -69,7 +74,18 @@ export default function SubcontractorPage({ user }) {
 
   return (
     <div>
-      <h2 className="mb-3">Панель субподрядчика</h2>
+      <div className="page-tabs">
+        {subcontractorTabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`page-tabs__button ${activeTab === tab.id ? 'page-tabs__button--active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+            type="button"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       {/* Статистика */}
       {statistics && (
@@ -89,17 +105,7 @@ export default function SubcontractorPage({ user }) {
         </div>
       )}
 
-      {/* Табы */}
       <div className="card">
-        <div className="flex gap-1 mb-3">
-          <button
-            className={`btn btn-small ${activeTab === 'assignments' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveTab('assignments')}
-          >
-            Мои наряды
-          </button>
-        </div>
-
         {loading && <p className="loading">Загрузка...</p>}
 
         {/* Наряды */}
@@ -179,6 +185,13 @@ export default function SubcontractorPage({ user }) {
               </div>
             )}
           </>
+        )}
+
+        {activeTab === 'issues' && (
+          <div className="empty-state">
+            <h3>Список замечаний недоступен</h3>
+            <p style={{ color: '#8e8e93', marginTop: '0.5rem' }}>Раздел появится в ближайшем обновлении.</p>
+          </div>
         )}
       </div>
 

@@ -13,6 +13,7 @@ body {
   background-color: #f5f5f5;
   overscroll-behavior: contain; /* Предотвращаем резиновый эффект */
   -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
 }
 
 body.modal-open {
@@ -30,7 +31,7 @@ body.modal-open {
 
 /* Header */
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5a5fe0 0%, #7b55d8 100%);
   color: white;
   padding: 1rem 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -45,6 +46,30 @@ body.modal-open {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-mark img {
+  height: 48px;
+  width: auto;
+}
+
+.brand-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .header h1 {
@@ -65,6 +90,31 @@ body.modal-open {
   width: 100%;
   margin: 2rem auto;
   padding: 0 2rem;
+}
+
+.page-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-tabs__button {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  color: #d6d6f5;
+  padding: 0.55rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: default;
+}
+
+.page-tabs__button--active {
+  background: #fff;
+  color: #5a5fe0;
+  border: 1px solid rgba(90, 95, 224, 0.15);
+  box-shadow: 0 6px 14px rgba(90, 95, 224, 0.15);
 }
 
 /* Auth pages */

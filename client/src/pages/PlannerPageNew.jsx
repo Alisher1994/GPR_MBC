@@ -3,6 +3,8 @@ import { planner } from '../api';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
 
+const plannerTabs = [{ id: 'gpr', label: 'ГПР' }];
+
 export default function PlannerPageNew({ user }) {
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
@@ -441,9 +443,13 @@ export default function PlannerPageNew({ user }) {
   return (
     <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-        <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: '#1c1c1e' }}>
-          Панель плановика
-        </h2>
+        <div className="page-tabs">
+          {plannerTabs.map((tab) => (
+            <button key={tab.id} className="page-tabs__button page-tabs__button--active">
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
         {error && (
           <div style={{
