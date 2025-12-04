@@ -207,16 +207,18 @@ export default function ForemanPageNew({ user }) {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#f5f5f7', overflow: 'hidden' }}>
-      {/* Header с селекторами */}
-      <div style={{ 
-        background: '#fff', 
-        padding: '1rem 1.5rem', 
-        borderBottom: '1px solid #e5e5ea',
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        alignItems: 'center'
-      }}>
+      {/* Header */}
+      <div style={{ padding: '1rem' }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: '16px',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          alignItems: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        }}>
         <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', marginRight: 'auto' }}>
           Прораб
         </h1>
@@ -281,9 +283,10 @@ export default function ForemanPageNew({ user }) {
             >
               <TabIcon name={tab.icon} size={18} />
               {tab.label}
-            </button>
-          ))}
+          </button>
+        ))}
         </div>
+      </div>
       </div>
 
       {/* Контент */}
@@ -320,8 +323,17 @@ export default function ForemanPageNew({ user }) {
                       }}
                     >
                       <span>🏢 {floor}</span>
-                      <span style={{ color: '#8e8e93', fontSize: '0.85rem' }}>
-                        {floorWorks.length} работ {expandedFloors[floor] ? '▼' : '▶'}
+                      <span style={{ color: '#8e8e93', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        {floorWorks.length} работ 
+                        {expandedFloors[floor] ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                          </svg>
+                        )}
                       </span>
                     </div>
 

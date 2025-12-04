@@ -11,6 +11,7 @@ export default function PlannerPageNew({ user }) {
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
+  const [xmlFiles, setXmlFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -164,8 +165,17 @@ export default function PlannerPageNew({ user }) {
     } else {
       setSections([]);
       setSelectedSection(null);
+      setXmlFiles([]);
     }
   }, [selectedQueue]);
+
+  useEffect(() => {
+    if (selectedSection) {
+      loadXmlFiles(selectedSection.id);
+    } else {
+      setXmlFiles([]);
+    }
+  }, [selectedSection]);
 
   const loadObjects = async () => {
     try {
@@ -191,8 +201,18 @@ export default function PlannerPageNew({ user }) {
       const res = await planner.getSections(queueId);
       setSections(res.data);
       setSelectedSection(null);
+      setXmlFiles([]);
     } catch (err) {
       setError('Ошибка загрузки секций');
+    }
+  };
+
+  const loadXmlFiles = async (sectionId) => {
+    try {
+      const res = await planner.getXmlFiles(sectionId);
+      setXmlFiles(res.data);
+    } catch (err) {
+      console.error('Ошибка загрузки XML файлов:', err);
     }
   };
 
@@ -365,16 +385,6 @@ export default function PlannerPageNew({ user }) {
 
   return (
     <div style={pageStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        {error && (
-          <div style={{ color: '#ff3b30', fontSize: '0.9rem' }}>
-            {error}
-            <button onClick={() => setError(null)} style={{ marginLeft: '0.5rem', cursor: 'pointer' }}>✕</button>
-          </div>
-        )}
-      </div>
-
       {/* 3 колонки */}
       <div style={columnsContainerStyle}>
         {/* Колонка 1: Объекты */}
@@ -509,7 +519,34 @@ export default function PlannerPageNew({ user }) {
 
       {/* Панель действий (показываем при выборе секции) */}
       {selectedSection && (
-        <div style={actionPanelStyle}>
+        <>
+          {/* Список XML файлов */}
+          {xmlFiles.length > 0 && (
+            <div style={{ background: '#fff', padding: '0.75rem 1.5rem', borderTop: '1px solid #e5e5ea', display: 'flex', gap: '0.5rem', overflowX: 'auto', flexWrap: 'wrap' }}>
+              {xmlFiles.map(file => (
+                <div
+                  key={file.id}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    background: file.status === 'active' ? '#007aff' : '#d1d1d6',
+                    color: file.status === 'active' ? '#fff' : '#636366',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <span>📄</span>
+                  <span>{file.filename}</span>
+                  {file.status === 'active' && <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>●</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div style={actionPanelStyle}>
           <button
             style={actionButtonStyle('#5856d6')}
             onClick={handleShowGantt}
@@ -549,6 +586,7 @@ export default function PlannerPageNew({ user }) {
             {exporting === 'full' ? 'Экспорт...' : 'Экспорт XML'}
           </button>
         </div>
+        </>
       )}
 
       {/* Модальное окно: Новый объект */}
