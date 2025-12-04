@@ -4,10 +4,6 @@
   box-sizing: border-box;
 }
 
-:root {
-  --gantt-row-height: 44px;
-}
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -350,96 +346,28 @@ body.modal-open {
   -webkit-overflow-scrolling: touch;
 }
 
-.gantt-modal-board {
-  width: 100%;
-  min-height: 420px;
-  max-height: 70vh;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  background: #fff;
-  display: flex;
-  overflow: auto;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-}
-
-.gantt-modal-board__list {
-  width: 280px;
-  flex-shrink: 0;
-  border-right: 1px solid #efeff4;
-  position: sticky;
-  left: 0;
-  top: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
-  z-index: 2;
-}
-
-.gantt-modal-board__chart {
-  flex: 1;
-  min-width: 0;
-  overflow: auto;
-}
-
 .gantt-chart-container {
   width: 100%;
   min-height: 420px;
   overflow: auto;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
   padding: 0.5rem;
   background: #fff;
 }
 
-.gantt-task-row {
-  padding: 0.65rem 0.85rem;
-  min-height: var(--gantt-row-height);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.35rem;
-  border-bottom: 1px solid #f1f1f5;
-}
-
-.gantt-task-row:last-child {
-  border-bottom: none;
-}
-
-.gantt-task-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1f1f1f;
-  line-height: 1.2;
-  word-break: break-word;
-}
-
-.gantt-task-tag {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.18rem 0.6rem;
-  border-radius: 999px;
-  width: max-content;
-}
-
-.gantt-task-tag.is-plan {
-  background: #e4efff;
-  color: #1d4ed8;
-}
-
-.gantt-task-tag.is-fact {
-  background: #dcfbe5;
-  color: #0a6b30;
-}
-
 .gantt-plan-bar .bar {
-  fill: #dbeafe;
-  stroke: #93c5fd;
+  fill: #d8f3dc; /* пастельный зелёный для плана */
+  stroke: #9dd9b5;
 }
 
 .gantt-actual-bar .bar {
-  fill: #34c759;
-  stroke: #2aae4e;
+  fill: #1f6f4d; /* тёмно-зелёный для факта */
+  stroke: #195c3f;
+}
+
+.gantt-actual-bar .bar-label {
+  fill: #fff;
 }
 
 .gantt-popup {

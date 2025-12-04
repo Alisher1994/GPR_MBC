@@ -21,7 +21,6 @@ export default function PlannerPageNew({ user }) {
   const [exporting, setExporting] = useState(null);
   const [showGanttModal, setShowGanttModal] = useState(false);
   const [ganttWorks, setGanttWorks] = useState([]);
-  const [ganttTasks, setGanttTasks] = useState([]);
   const [ganttLoading, setGanttLoading] = useState(false);
   const [ganttError, setGanttError] = useState(null);
 
@@ -111,16 +110,17 @@ export default function PlannerPageNew({ user }) {
   }, [showGanttModal]);
 
   useEffect(() => {
-    if (!showGanttModal || ganttLoading || ganttTasks.length === 0 || !ganttContainerRef.current) {
+    if (!showGanttModal || ganttLoading || ganttWorks.length === 0 || !ganttContainerRef.current) {
       return;
     }
 
-    if (ganttTasks.length === 0) {
+    const tasks = transformWorksToGanttTasks(ganttWorks);
+    if (tasks.length === 0) {
       return;
     }
 
     ganttContainerRef.current.innerHTML = '';
-    ganttInstanceRef.current = new Gantt(ganttContainerRef.current, ganttTasks, {
+    ganttInstanceRef.current = new Gantt(ganttContainerRef.current, tasks, {
       view_mode: 'Week',
       date_format: 'YYYY-MM-DD',
       bar_height: 26,
@@ -139,7 +139,7 @@ export default function PlannerPageNew({ user }) {
         `;
       }
     });
-  }, [showGanttModal, ganttTasks, ganttLoading]);
+  }, [showGanttModal, ganttWorks, ganttLoading]);
 
   const loadObjects = async () => {
     try {
@@ -182,13 +182,10 @@ export default function PlannerPageNew({ user }) {
     setGanttError(null);
     try {
       const response = await planner.getSectionWorks(selectedSection.id);
-      const works = response.data || [];
-      setGanttWorks(works);
-      setGanttTasks(transformWorksToGanttTasks(works));
+      setGanttWorks(response.data || []);
     } catch (error) {
       console.error('Ошибка загрузки данных для ганта:', error);
       setGanttError(error.response?.data?.error || 'Не удалось загрузить данные для диаграммы');
-      setGanttTasks([]);
     } finally {
       setGanttLoading(false);
     }
@@ -197,7 +194,6 @@ export default function PlannerPageNew({ user }) {
   const handleCloseGantt = () => {
     setShowGanttModal(false);
     setGanttWorks([]);
-    setGanttTasks([]);
     setGanttError(null);
   };
 
@@ -869,7 +865,7 @@ export default function PlannerPageNew({ user }) {
               <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
             ) : ganttError ? (
               <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
-            ) : ganttTasks.length === 0 ? (
+            ) : ganttWorks.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
                 Нет работ для построения графика. Загрузите XML и распределите задания.
               </div>
@@ -877,31 +873,15 @@ export default function PlannerPageNew({ user }) {
               <>
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#dbeafe', border: '1px solid #93c5fd' }}></span>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#d8f3dc', border: '1px solid #9dd9b5' }}></span>
                     <span style={{ fontSize: '0.85rem', color: '#525252' }}>План</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#34c759' }}></span>
+                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#1f6f4d' }}></span>
                     <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
                   </div>
                 </div>
-                <div className="gantt-modal-board">
-                  <div className="gantt-modal-board__list">
-                    {ganttTasks.map((task) => (
-                      <div key={task.id} className="gantt-task-row">
-                        <div className="gantt-task-name">{task.name}</div>
-                        {task.details?.type && (
-                          <span className={`gantt-task-tag ${task.details.type === 'Факт' ? 'is-fact' : 'is-plan'}`}>
-                            {task.details.type}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="gantt-modal-board__chart">
-                    <div className="gantt-chart-container" ref={ganttContainerRef}></div>
-                  </div>
-                </div>
+                <div className="gantt-chart-container" ref={ganttContainerRef}></div>
               </>
             )}
           </div>
