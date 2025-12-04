@@ -143,6 +143,13 @@ body.modal-open {
   text-align: center;
 }
 
+.login-logo {
+  display: block;
+  margin: 0 auto 2rem;
+  max-width: 200px;
+  height: auto;
+}
+
 /* Forms */
 .form-group {
   margin-bottom: 1.5rem;

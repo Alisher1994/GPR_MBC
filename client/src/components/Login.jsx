@@ -48,7 +48,11 @@ export default function Login({ onLogin }) {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>{isRegister ? 'Регистрация' : 'Вход в систему'}</h2>
+        {isRegister ? (
+          <h2>Регистрация</h2>
+        ) : (
+          <img src="/LoginLogo.svg" alt="Логотип" className="login-logo" />
+        )}
         
         {error && (
           <div className="alert alert-error">{error}</div>
