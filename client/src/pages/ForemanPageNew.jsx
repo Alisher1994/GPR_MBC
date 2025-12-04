@@ -19,6 +19,21 @@ export default function ForemanPageNew({ user }) {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [hasUpdates, setHasUpdates] = useState(false);
 
+  const columnHighlight = {
+    completed: {
+      header: { background: '#ecfdf3' },
+      cell: { background: '#f7fdf9' }
+    },
+    assigned: {
+      header: { background: '#fff7ed' },
+      cell: { background: '#fffaf3' }
+    },
+    remaining: {
+      header: { background: '#ffeef0' },
+      cell: { background: '#fff6f7' }
+    }
+  };
+
   useEffect(() => {
     loadObjects();
     loadSubcontractors();
@@ -286,46 +301,46 @@ export default function ForemanPageNew({ user }) {
               </div>
 
               {/* Выбор секции */}
-              {selectedObjectId && (
-                <div className="form-group" style={{ flex: '1 1 200px', marginBottom: 0 }}>
-                  <label>Секция</label>
-                  <select
-                    value={selectedSectionId}
-                    onChange={(e) => setSelectedSectionId(e.target.value)}
-                  >
-                    <option value="">-- Выберите секцию --</option>
-                    {sections.map(sec => (
-                      <option key={sec.id} value={sec.id}>
-                        Секция {sec.section_number} - {sec.section_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <div className="form-group" style={{ flex: '1 1 200px', marginBottom: 0 }}>
+                <label>Секция</label>
+                <select
+                  value={selectedSectionId}
+                  onChange={(e) => setSelectedSectionId(e.target.value)}
+                  disabled={!selectedObjectId}
+                >
+                  <option value="">
+                    {selectedObjectId ? '-- Выберите секцию --' : 'Сначала выберите объект'}
+                  </option>
+                  {sections.map(sec => (
+                    <option key={sec.id} value={sec.id}>
+                      Секция {sec.section_number} - {sec.section_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Кнопка обновить */}
-              {selectedSectionId && (
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
-                  <button
-                    className="btn btn-primary"
-                    onClick={loadWorks}
-                    disabled={loading}
-                    style={{ 
-                      marginBottom: 0, 
-                      whiteSpace: 'nowrap', 
-                      flexShrink: 0,
-                      background: hasUpdates ? '#ff9500' : undefined
-                    }}
-                  >
-                    {hasUpdates ? '🔄 Есть обновления!' : '🔄 Обновить'}
-                  </button>
-                  {lastUpdate && !hasUpdates && (
-                    <span style={{ fontSize: '0.75rem', color: '#8e8e93', whiteSpace: 'nowrap', alignSelf: 'center' }}>
-                      Обновлено {new Date(lastUpdate).toLocaleTimeString('ru-RU')}
-                    </span>
-                  )}
-                </div>
-              )}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={loadWorks}
+                  disabled={!selectedSectionId || loading}
+                  style={{ 
+                    marginBottom: 0, 
+                    whiteSpace: 'nowrap', 
+                    flexShrink: 0,
+                    opacity: !selectedSectionId || loading ? 0.6 : 1,
+                    background: hasUpdates ? '#ff9500' : undefined
+                  }}
+                >
+                  {hasUpdates ? '🔄 Есть обновления!' : '🔄 Обновить'}
+                </button>
+                {selectedSectionId && lastUpdate && !hasUpdates && (
+                  <span style={{ fontSize: '0.75rem', color: '#8e8e93', whiteSpace: 'nowrap', alignSelf: 'center' }}>
+                    Обновлено {new Date(lastUpdate).toLocaleTimeString('ru-RU')}
+                  </span>
+                )}
+              </div>
             </div>
 
             {loading && <p className="loading">Загрузка...</p>}
@@ -377,9 +392,9 @@ export default function ForemanPageNew({ user }) {
                                       <th>Начало</th>
                                       <th>Окончание</th>
                                       <th>Объем</th>
-                                      <th>Выполнено</th>
-                                      <th>Назначено</th>
-                                      <th>Остаток</th>
+                                      <th style={columnHighlight.completed.header}>Выполнено</th>
+                                      <th style={columnHighlight.assigned.header}>Назначено</th>
+                                      <th style={columnHighlight.remaining.header}>Остаток</th>
                                       <th>Действие</th>
                                     </tr>
                                   </thead>
@@ -393,9 +408,13 @@ export default function ForemanPageNew({ user }) {
                                           <td>{new Date(work.start_date).toLocaleDateString('ru-RU')}</td>
                                           <td>{new Date(work.end_date).toLocaleDateString('ru-RU')}</td>
                                           <td>{work.total_volume} {work.unit}</td>
-                                          <td>{work.actual_completed || 0} {work.unit}</td>
-                                          <td>{work.assigned_total || 0} {work.unit}</td>
-                                          <td style={{ fontWeight: '600', color: remaining > 0 ? '#007aff' : '#34c759' }}>
+                                          <td style={columnHighlight.completed.cell}>{work.actual_completed || 0} {work.unit}</td>
+                                          <td style={columnHighlight.assigned.cell}>{work.assigned_total || 0} {work.unit}</td>
+                                          <td style={{ 
+                                            ...columnHighlight.remaining.cell,
+                                            fontWeight: '600', 
+                                            color: remaining > 0 ? '#007aff' : '#34c759' 
+                                          }}>
                                             {remaining.toFixed(2)} {work.unit}
                                           </td>
                                           <td>
