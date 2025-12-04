@@ -34,8 +34,16 @@ export default function PlannerPageNew({ user }) {
     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
     display: 'flex',
     flexDirection: 'column',
-    height: 'calc(100vh - 5.5rem)',
+    height: '100%',
     overflow: 'hidden'
+  };
+
+  const layoutGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: '340px 340px minmax(560px, 1fr)',
+    gap: '1.5rem',
+    alignItems: 'stretch',
+    height: 'calc(100vh - 5rem)'
   };
 
   const headerRowStyle = {
@@ -440,7 +448,7 @@ export default function PlannerPageNew({ user }) {
 
   return (
     <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
-      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1800px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: '#1c1c1e' }}>
           Панель плановика
         </h2>
@@ -457,13 +465,7 @@ export default function PlannerPageNew({ user }) {
           </div>
         )}
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '320px 320px 1fr', 
-          gap: '1.5rem',
-          alignItems: 'stretch',
-          height: 'calc(100vh - 4rem)'
-        }}>
+        <div style={layoutGridStyle}>
           
           {/* КОЛОНКА 1: ОБЪЕКТЫ */}
           <div style={{ ...columnContainerStyle }}>
@@ -745,8 +747,8 @@ export default function PlannerPageNew({ user }) {
                 </div>
               ) : (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div style={{ overflowX: 'auto', flex: 1 }}>
+                    <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #e5e5ea' }}>
                       <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>№</th>
