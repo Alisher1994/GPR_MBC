@@ -51,26 +51,12 @@ body.modal-open {
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 1rem;
 }
 
 .brand-mark img {
-  height: 52px;
+  height: 40px;
   width: auto;
   display: block;
-}
-
-.brand-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.brand-subtitle {
-  font-size: 0.78rem;
-  opacity: 0.85;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 
 .header h1 {
