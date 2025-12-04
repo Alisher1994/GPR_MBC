@@ -3,7 +3,99 @@ import pool from '../db/pool.js';
 
 const router = express.Router();
 
-// Получить работы на ближайшие 1-2 недели
+// ========== ОБЪЕКТЫ, ОЧЕРЕДИ, СЕКЦИИ ==========
+
+// Получить все объекты
+router.get('/objects', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        o.*,
+        COUNT(DISTINCT q.id) as queues_count
+      FROM objects o
+      LEFT JOIN queues q ON o.id = q.object_id
+      GROUP BY o.id
+      ORDER BY o.name
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения объектов:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Получить очереди объекта
+router.get('/objects/:objectId/queues', async (req, res) => {
+  try {
+    const { objectId } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        q.*,
+        COUNT(DISTINCT s.id) as sections_count
+      FROM queues q
+      LEFT JOIN sections s ON q.id = s.queue_id
+      WHERE q.object_id = $1
+      GROUP BY q.id
+      ORDER BY q.queue_number
+    `, [objectId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения очередей:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Получить секции очереди
+router.get('/queues/:queueId/sections', async (req, res) => {
+  try {
+    const { queueId } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        s.*,
+        COUNT(DISTINCT wi.id) as works_count
+      FROM sections s
+      LEFT JOIN work_items wi ON s.id = wi.section_id
+      WHERE s.queue_id = $1
+      GROUP BY s.id
+      ORDER BY s.section_number
+    `, [queueId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения секций:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Получить работы секции
+router.get('/sections/:sectionId/works', async (req, res) => {
+  try {
+    const { sectionId } = req.params;
+
+    const result = await pool.query(
+      `SELECT 
+         wi.*,
+         COALESCE(SUM(cw.completed_volume) FILTER (WHERE cw.status = 'approved'), 0) as actual_completed,
+         COALESCE(SUM(wa.assigned_volume), 0) as assigned_total,
+         COUNT(DISTINCT wa.id) as assignments_count
+       FROM work_items wi
+       LEFT JOIN work_assignments wa ON wi.id = wa.work_item_id
+       LEFT JOIN completed_works cw ON wa.id = cw.assignment_id
+       WHERE wi.section_id = $1
+       GROUP BY wi.id
+       ORDER BY wi.floor, wi.work_type`,
+      [sectionId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения работ:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ========== СТАРЫЕ РОУТЫ ==========
+
+// Получить работы на ближайшие 1-2 недели (deprecated)
 router.get('/upcoming-works/:objectId', async (req, res) => {
   try {
     const { objectId } = req.params;

@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 /**
  * Парсит XML файл из Primavera P6 и возвращает только этажи и виды работ
  * Object и Section создаются вручную в UI, поэтому парсим только Floor → WorkType
+ * Поддерживает оба формата: Stage (Primavera) и Queue (экспорт из системы)
  */
 export async function parseXMLFile(filePath) {
   try {
@@ -16,13 +17,14 @@ export async function parseXMLFile(filePath) {
     
     const workItems = [];
 
-    // Парсим структуру: Object → Stage → Section → Floor → WorkType
-    // Но извлекаем только Floor и WorkType, так как Object/Section уже созданы вручную
-    const stages = Array.isArray(object.Stage) ? object.Stage : [object.Stage];
+    // Парсим структуру: Object → Stage/Queue → Section → Floor → WorkType
+    // Поддерживаем оба тега: Stage (из Primavera) и Queue (из нашего экспорта)
+    const queues = object.Stage || object.Queue;
+    const queueArray = Array.isArray(queues) ? queues : [queues];
 
-    for (const stage of stages) {
-      if (!stage) continue;
-      const sections = Array.isArray(stage.Section) ? stage.Section : [stage.Section];
+    for (const queue of queueArray) {
+      if (!queue) continue;
+      const sections = Array.isArray(queue.Section) ? queue.Section : [queue.Section];
 
       for (const section of sections) {
         if (!section) continue;
@@ -30,7 +32,7 @@ export async function parseXMLFile(filePath) {
 
         for (const floor of floors) {
           if (!floor) continue;
-          const floorName = floor.$.Name;
+          const floorName = floor.$ ? floor.$.Name : floor.Name;
           const workTypes = Array.isArray(floor.WorkType) ? floor.WorkType : [floor.WorkType];
 
           for (const workType of workTypes) {
@@ -69,28 +71,25 @@ export async function parseXMLFile(filePath) {
 
 /**
  * Генерирует XML файл для экспорта обратно в Primavera
+ * sectionInfo содержит: object_name, queue_name, queue_number, section_name, section_number
  */
-export async function generateXMLFromData(objectName, workItems) {
+export async function generateXMLFromData(sectionInfo, workItems) {
   const builder = new xml2js.Builder({
     xmldec: { version: '1.0', encoding: 'UTF-8' }
   });
 
-  // Группируем данные по структуре
-  const grouped = {};
+  // Группируем данные по этажам
+  const floorGroups = {};
   
   for (const item of workItems) {
-    const stageName = item.stage || item.stage_name || item.section_name || 'Stage 1';
-    const sectionName = item.section || item.section_name || `Section ${item.section_number || ''}`.trim() || 'Section';
     const floorName = item.floor || 'Floor';
 
-    if (!grouped[stageName]) grouped[stageName] = {};
-    if (!grouped[stageName][sectionName]) grouped[stageName][sectionName] = {};
-    if (!grouped[stageName][sectionName][floorName]) grouped[stageName][sectionName][floorName] = [];
+    if (!floorGroups[floorName]) floorGroups[floorName] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[stageName][sectionName][floorName].push({
+    floorGroups[floorName].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],
@@ -102,34 +101,36 @@ export async function generateXMLFromData(objectName, workItems) {
     });
   }
 
-  // Строим структуру XML
-  const stages = [];
-  for (const [stageName, sections] of Object.entries(grouped)) {
-    const sectionArray = [];
-    for (const [sectionName, floors] of Object.entries(sections)) {
-      const floorArray = [];
-      for (const [floorName, works] of Object.entries(floors)) {
-        floorArray.push({
-          $: { Name: floorName },
-          WorkType: works
-        });
-      }
-      sectionArray.push({
-        $: { Name: sectionName },
-        Floor: floorArray
-      });
-    }
-    stages.push({
-      $: { Name: stageName },
-      Section: sectionArray
+  // Строим структуру XML с учетом очереди
+  const floors = [];
+  for (const [floorName, works] of Object.entries(floorGroups)) {
+    floors.push({
+      $: { Name: floorName },
+      WorkType: works
     });
   }
 
   const xmlObject = {
     ProjectData: {
       Object: {
-        $: { Name: objectName },
-        Stage: stages
+        $: { 
+          Name: sectionInfo.object_name,
+          StartDate: new Date().toISOString().split('T')[0],
+          EndDate: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
+        },
+        Queue: {
+          $: { 
+            Name: sectionInfo.queue_name || `${sectionInfo.queue_number || 1} очередь`,
+            Number: sectionInfo.queue_number || 1
+          },
+          Section: {
+            $: { 
+              Name: sectionInfo.section_name,
+              Number: sectionInfo.section_number || 1
+            },
+            Floor: floors
+          }
+        }
       }
     }
   };
@@ -139,8 +140,9 @@ export async function generateXMLFromData(objectName, workItems) {
 
 /**
  * Генерирует XML файл только с выполненными объемами для Primavera
+ * sectionInfo содержит: object_name, queue_name, queue_number, section_name, section_number
  */
-export async function generateCompletedWorksXML(objectName, workItems) {
+export async function generateCompletedWorksXML(sectionInfo, workItems) {
   const builder = new xml2js.Builder({
     xmldec: { version: '1.0', encoding: 'UTF-8' }
   });
@@ -152,22 +154,18 @@ export async function generateCompletedWorksXML(objectName, workItems) {
     throw new Error('Нет выполненных работ для экспорта');
   }
 
-  // Группируем данные по структуре
-  const grouped = {};
+  // Группируем данные по этажам
+  const floorGroups = {};
   
   for (const item of completedItems) {
-    const stageName = item.stage || item.stage_name || item.section_name || 'Stage 1';
-    const sectionName = item.section || item.section_name || `Section ${item.section_number || ''}`.trim() || 'Section';
     const floorName = item.floor || 'Floor';
 
-    if (!grouped[stageName]) grouped[stageName] = {};
-    if (!grouped[stageName][sectionName]) grouped[stageName][sectionName] = {};
-    if (!grouped[stageName][sectionName][floorName]) grouped[stageName][sectionName][floorName] = [];
+    if (!floorGroups[floorName]) floorGroups[floorName] = [];
     
     const startDate = item.start_date instanceof Date ? item.start_date : new Date(item.start_date);
     const endDate = item.end_date instanceof Date ? item.end_date : new Date(item.end_date);
     
-    grouped[stageName][sectionName][floorName].push({
+    floorGroups[floorName].push({
       $: {
         Name: item.work_type,
         StartDate: startDate.toISOString().split('T')[0],
@@ -179,34 +177,35 @@ export async function generateCompletedWorksXML(objectName, workItems) {
     });
   }
 
-  // Строим структуру XML
-  const stages = [];
-  for (const [stageName, sections] of Object.entries(grouped)) {
-    const sectionArray = [];
-    for (const [sectionName, floors] of Object.entries(sections)) {
-      const floorArray = [];
-      for (const [floorName, works] of Object.entries(floors)) {
-        floorArray.push({
-          $: { Name: floorName },
-          WorkType: works
-        });
-      }
-      sectionArray.push({
-        $: { Name: sectionName },
-        Floor: floorArray
-      });
-    }
-    stages.push({
-      $: { Name: stageName },
-      Section: sectionArray
+  // Строим структуру XML с учетом очереди
+  const floors = [];
+  for (const [floorName, works] of Object.entries(floorGroups)) {
+    floors.push({
+      $: { Name: floorName },
+      WorkType: works
     });
   }
 
   const xmlObject = {
     ProjectData: {
       Object: {
-        $: { Name: objectName },
-        Stage: stages
+        $: { 
+          Name: sectionInfo.object_name,
+          ExportDate: new Date().toISOString().split('T')[0]
+        },
+        Queue: {
+          $: { 
+            Name: sectionInfo.queue_name || `${sectionInfo.queue_number || 1} очередь`,
+            Number: sectionInfo.queue_number || 1
+          },
+          Section: {
+            $: { 
+              Name: sectionInfo.section_name,
+              Number: sectionInfo.section_number || 1
+            },
+            Floor: floors
+          }
+        }
       }
     }
   };

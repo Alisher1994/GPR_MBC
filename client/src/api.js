@@ -31,14 +31,19 @@ export const planner = {
   createObject: (data) => api.post('/planner/objects', data),
   deleteObject: (objectId) => api.delete(`/planner/objects/${objectId}`),
   
-  // Секции
-  getObjectSections: (objectId) => api.get(`/planner/objects/${objectId}/sections`),
-  createSection: (objectId, data) => api.post(`/planner/objects/${objectId}/sections`, data),
+  // Очереди
+  getQueues: (objectId) => api.get(`/planner/objects/${objectId}/queues`),
+  createQueue: (objectId, data) => api.post(`/planner/objects/${objectId}/queues`, data),
+  deleteQueue: (queueId) => api.delete(`/planner/queues/${queueId}`),
+  
+  // Секции (теперь привязаны к очередям)
+  getSections: (queueId) => api.get(`/planner/queues/${queueId}/sections`),
+  createSection: (queueId, data) => api.post(`/planner/queues/${queueId}/sections`, data),
   deleteSection: (sectionId) => api.delete(`/planner/sections/${sectionId}`),
   
   // XML файлы
-  getSectionXmlFiles: (sectionId) => api.get(`/planner/sections/${sectionId}/xml-files`),
-  uploadSectionXml: (sectionId, formData) => api.post(`/planner/sections/${sectionId}/upload-xml`, formData, {
+  getXmlFiles: (sectionId) => api.get(`/planner/sections/${sectionId}/xml-files`),
+  uploadXML: (sectionId, formData) => api.post(`/planner/sections/${sectionId}/upload-xml`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   deleteXmlFile: (fileId) => api.delete(`/planner/xml-files/${fileId}`),
@@ -48,15 +53,16 @@ export const planner = {
   exportSection: (sectionId) => api.get(`/planner/sections/${sectionId}/export`, {
     responseType: 'blob'
   }),
-  exportCompletedSection: (sectionId) => api.get(`/planner/sections/${sectionId}/export-completed`, {
+  exportCompleted: (sectionId) => api.get(`/planner/sections/${sectionId}/export-completed`, {
     responseType: 'blob'
   })
 };
 
 export const foreman = {
-  // Объекты и секции
+  // Объекты, очереди и секции
   getObjects: () => api.get('/foreman/objects'),
-  getObjectSections: (objectId) => api.get(`/foreman/objects/${objectId}/sections`),
+  getQueues: (objectId) => api.get(`/foreman/objects/${objectId}/queues`),
+  getSections: (queueId) => api.get(`/foreman/queues/${queueId}/sections`),
   getSectionWorks: (sectionId, weeks) => {
     const params = {};
     if (typeof weeks !== 'undefined' && weeks !== null) {
@@ -64,8 +70,6 @@ export const foreman = {
     }
     return api.get(`/foreman/sections/${sectionId}/works`, { params });
   },
-  checkSectionUpdates: (sectionId, lastChecked) => 
-    api.get(`/foreman/sections/${sectionId}/check-updates`, { params: { lastChecked } }),
   
   // Распределение работ
   assignWork: (workItemId, assignments, foremanId) =>

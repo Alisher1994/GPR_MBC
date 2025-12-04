@@ -44,10 +44,10 @@ router.get('/objects', async (req, res) => {
       SELECT 
         o.*,
         u.username as created_by_name,
-        COUNT(DISTINCT s.id) as sections_count
+        COUNT(DISTINCT q.id) as queues_count
       FROM objects o
       LEFT JOIN users u ON o.created_by = u.id
-      LEFT JOIN sections s ON o.id = s.object_id
+      LEFT JOIN queues q ON o.id = q.object_id
       GROUP BY o.id, u.username
       ORDER BY o.created_at DESC
     `);
@@ -84,7 +84,7 @@ router.delete('/objects/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Удаляем объект (каскадно удалятся секции, файлы и работы)
+    // Удаляем объект (каскадно удалятся очереди, секции, файлы и работы)
     await pool.query('DELETE FROM objects WHERE id = $1', [id]);
 
     res.json({ message: 'Объект успешно удален' });
@@ -94,12 +94,80 @@ router.delete('/objects/:id', async (req, res) => {
   }
 });
 
-// ========== СЕКЦИИ ==========
+// ========== ОЧЕРЕДИ ==========
 
-// Получить секции объекта
-router.get('/objects/:objectId/sections', async (req, res) => {
+// Получить очереди объекта
+router.get('/objects/:objectId/queues', async (req, res) => {
   try {
     const { objectId } = req.params;
+
+    const result = await pool.query(`
+      SELECT 
+        q.*,
+        u.username as created_by_name,
+        COUNT(DISTINCT s.id) as sections_count
+      FROM queues q
+      LEFT JOIN users u ON q.created_by = u.id
+      LEFT JOIN sections s ON q.id = s.queue_id
+      WHERE q.object_id = $1
+      GROUP BY q.id, u.username
+      ORDER BY q.queue_number
+    `, [objectId]);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка получения очередей:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Создать очередь
+router.post('/objects/:objectId/queues', async (req, res) => {
+  try {
+    const { objectId } = req.params;
+    const { queueNumber, queueName, userId } = req.body;
+
+    if (!queueNumber || !queueName) {
+      return res.status(400).json({ error: 'Номер и название очереди обязательны' });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO queues (object_id, queue_number, queue_name, created_by) 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [objectId, queueNumber, queueName, userId]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    if (error.code === '23505') {
+      res.status(400).json({ error: 'Очередь с таким номером уже существует' });
+    } else {
+      console.error('Ошибка создания очереди:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// Удалить очередь
+router.delete('/queues/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query('DELETE FROM queues WHERE id = $1', [id]);
+
+    res.json({ message: 'Очередь успешно удалена' });
+  } catch (error) {
+    console.error('Ошибка удаления очереди:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ========== СЕКЦИИ ==========
+
+// Получить секции очереди
+router.get('/queues/:queueId/sections', async (req, res) => {
+  try {
+    const { queueId } = req.params;
 
     const result = await pool.query(`
       SELECT 
@@ -110,10 +178,10 @@ router.get('/objects/:objectId/sections', async (req, res) => {
       FROM sections s
       LEFT JOIN users u ON s.created_by = u.id
       LEFT JOIN xml_files xf ON s.id = xf.section_id
-      WHERE s.object_id = $1
+      WHERE s.queue_id = $1
       GROUP BY s.id, u.username
       ORDER BY s.section_number
-    `, [objectId]);
+    `, [queueId]);
 
     res.json(result.rows);
   } catch (error) {
@@ -123,9 +191,9 @@ router.get('/objects/:objectId/sections', async (req, res) => {
 });
 
 // Создать секцию
-router.post('/objects/:objectId/sections', async (req, res) => {
+router.post('/queues/:queueId/sections', async (req, res) => {
   try {
-    const { objectId } = req.params;
+    const { queueId } = req.params;
     const { sectionNumber, sectionName, userId } = req.body;
 
     if (!sectionNumber || !sectionName) {
@@ -133,14 +201,14 @@ router.post('/objects/:objectId/sections', async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO sections (object_id, section_number, section_name, created_by) 
+      `INSERT INTO sections (queue_id, section_number, section_name, created_by) 
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [objectId, sectionNumber, sectionName, userId]
+      [queueId, sectionNumber, sectionName, userId]
     );
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    if (error.code === '23505') { // Unique violation
+    if (error.code === '23505') {
       res.status(400).json({ error: 'Секция с таким номером уже существует' });
     } else {
       console.error('Ошибка создания секции:', error);
@@ -314,9 +382,10 @@ router.get('/sections/:sectionId/export', async (req, res) => {
     const { sectionId } = req.params;
 
     const sectionInfo = await pool.query(
-      `SELECT s.section_name, s.section_number, o.name AS object_name
+      `SELECT s.section_name, s.section_number, q.queue_name, q.queue_number, o.name AS object_name
        FROM sections s
-       JOIN objects o ON s.object_id = o.id
+       JOIN queues q ON s.queue_id = q.id
+       JOIN objects o ON q.object_id = o.id
        WHERE s.id = $1`,
       [sectionId]
     );
@@ -338,7 +407,7 @@ router.get('/sections/:sectionId/export', async (req, res) => {
       return res.status(404).json({ error: 'Нет данных для экспорта' });
     }
 
-    const xmlContent = await generateXMLFromData(sectionInfo.rows[0].object_name, result.rows);
+    const xmlContent = await generateXMLFromData(sectionInfo.rows[0], result.rows);
     
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename=export-section-${sectionId}.xml`);
@@ -356,9 +425,10 @@ router.get('/sections/:sectionId/export-completed', async (req, res) => {
     const { sectionId } = req.params;
 
     const sectionInfo = await pool.query(
-      `SELECT s.section_name, s.section_number, o.name AS object_name
+      `SELECT s.section_name, s.section_number, q.queue_name, q.queue_number, o.name AS object_name
        FROM sections s
-       JOIN objects o ON s.object_id = o.id
+       JOIN queues q ON s.queue_id = q.id
+       JOIN objects o ON q.object_id = o.id
        WHERE s.id = $1`,
       [sectionId]
     );
@@ -380,11 +450,17 @@ router.get('/sections/:sectionId/export-completed', async (req, res) => {
       return res.status(404).json({ error: 'Нет завершенных работ для экспорта' });
     }
 
-    const xmlContent = await generateCompletedWorksXML(sectionInfo.rows[0].object_name, result.rows);
+    const xmlContent = await generateCompletedWorksXML(sectionInfo.rows[0], result.rows);
     
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename=completed-section-${sectionId}.xml`);
     res.send(xmlContent);
+
+  } catch (error) {
+    console.error('Ошибка экспорта завершенных работ:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
   } catch (error) {
     console.error('Ошибка экспорта завершенных работ:', error);

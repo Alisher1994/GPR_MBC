@@ -26,6 +26,7 @@ const recreateTables = async (retries = 5, delay = 3000) => {
         await client.query('DROP TABLE IF EXISTS work_items CASCADE');
         await client.query('DROP TABLE IF EXISTS xml_files CASCADE');
         await client.query('DROP TABLE IF EXISTS sections CASCADE');
+        await client.query('DROP TABLE IF EXISTS queues CASCADE');
         await client.query('DROP TABLE IF EXISTS objects CASCADE');
         
         console.log('✓ Old tables dropped');
@@ -56,17 +57,32 @@ const recreateTables = async (retries = 5, delay = 3000) => {
         `);
         console.log('✓ Objects table');
 
-        // Таблица секций
+        // Таблица очередей (этапов)
+        await client.query(`
+          CREATE TABLE queues (
+            id SERIAL PRIMARY KEY,
+            object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
+            queue_number INTEGER NOT NULL,
+            queue_name VARCHAR(255) NOT NULL,
+            created_by INTEGER REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(object_id, queue_number)
+          )
+        `);
+        console.log('✓ Queues table');
+
+        // Таблица секций (теперь привязана к очереди)
         await client.query(`
           CREATE TABLE sections (
             id SERIAL PRIMARY KEY,
-            object_id INTEGER REFERENCES objects(id) ON DELETE CASCADE,
+            queue_id INTEGER REFERENCES queues(id) ON DELETE CASCADE,
             section_number INTEGER NOT NULL,
             section_name VARCHAR(255) NOT NULL,
             created_by INTEGER REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(object_id, section_number)
+            UNIQUE(queue_id, section_number)
           )
         `);
         console.log('✓ Sections table');
@@ -145,7 +161,8 @@ const recreateTables = async (retries = 5, delay = 3000) => {
           CREATE INDEX idx_work_items_dates ON work_items(start_date, end_date);
           CREATE INDEX idx_work_assignments_status ON work_assignments(status);
           CREATE INDEX idx_completed_works_date ON completed_works(work_date);
-          CREATE INDEX idx_sections_object ON sections(object_id);
+          CREATE INDEX idx_queues_object ON queues(object_id);
+          CREATE INDEX idx_sections_queue ON sections(queue_id);
           CREATE INDEX idx_xml_files_section ON xml_files(section_id);
         `);
         console.log('✓ Indexes created');
