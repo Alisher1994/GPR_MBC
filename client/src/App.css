@@ -51,24 +51,25 @@ body.modal-open {
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .brand-mark img {
-  height: 48px;
+  height: 52px;
   width: auto;
+  display: block;
 }
 
 .brand-title {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
 }
 
 .brand-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   opacity: 0.85;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
@@ -94,27 +95,41 @@ body.modal-open {
 
 .page-tabs {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+  padding: 0.4rem;
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(86, 70, 205, 0.16);
+  flex-wrap: wrap;
 }
 
 .page-tabs__button {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.15);
-  color: #d6d6f5;
-  padding: 0.55rem 1.5rem;
-  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #7b7fae;
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: default;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .page-tabs__button--active {
-  background: #fff;
-  color: #5a5fe0;
-  border: 1px solid rgba(90, 95, 224, 0.15);
-  box-shadow: 0 6px 14px rgba(90, 95, 224, 0.15);
+  background: #eef0ff;
+  color: #4f46e5;
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.25);
+}
+
+.page-tabs__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Auth pages */

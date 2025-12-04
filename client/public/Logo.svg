@@ -1,6 +1,7 @@
-<svg width="434" height="161" viewBox="0 0 434 161" xmlns="http://www.w3.org/2000/svg">
-	<rect width="434" height="161" rx="8" fill="#5d5d5d"/>
-	<path d="M70 122V39h28l44 56 44-56h28v83h-28V94l-44 56-44-56v28H70z" fill="#ffffff"/>
-	<text x="210" y="84" fill="#ffffff" font-family="'Montserrat','Segoe UI','Arial',sans-serif" font-size="46" font-weight="600">MURAD</text>
-	<text x="210" y="126" fill="#ffffff" font-family="'Montserrat','Segoe UI','Arial',sans-serif" font-size="36" font-weight="500">BUILDINGS</text>
+<svg width="160" height="64" viewBox="0 0 160 64" xmlns="http://www.w3.org/2000/svg">
+	<rect width="160" height="64" rx="12" fill="#5d5d5d" />
+	<path
+		d="M34 50V14h14l16 20 16-20h14v36h-14V36l-16 20-16-20v14H34z"
+		fill="#ffffff"
+	/>
 </svg>

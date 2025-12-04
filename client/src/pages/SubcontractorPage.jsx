@@ -1,10 +1,11 @@
 ﻿import { useState, useEffect } from 'react';
 import { subcontractor } from '../api';
 import VolumeSlider from '../components/VolumeSlider';
+import TabIcon from '../components/TabIcon';
 
 const subcontractorTabs = [
-  { id: 'assignments', label: 'Наряды' },
-  { id: 'issues', label: 'Список замечаний' }
+  { id: 'assignments', label: 'Наряды', icon: 'list' },
+  { id: 'issues', label: 'Список замечаний', icon: 'clipboard' }
 ];
 
 export default function SubcontractorPage({ user }) {
@@ -82,7 +83,12 @@ export default function SubcontractorPage({ user }) {
             onClick={() => setActiveTab(tab.id)}
             type="button"
           >
-            {tab.label}
+            {tab.icon && (
+              <span className="page-tabs__icon">
+                <TabIcon name={tab.icon} size={18} />
+              </span>
+            )}
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>

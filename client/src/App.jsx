@@ -64,8 +64,8 @@ function App() {
           <div className="brand-mark">
             <img src="/Logo.svg" alt="Murad Buildings" />
             <div>
-              <div className="brand-title">Murad Buildings</div>
-              <div className="brand-subtitle">Construction Control</div>
+              <div className="brand-title">MURAD BUILDINGS</div>
+              <div className="brand-subtitle">CONSTRUCTION CONTROL</div>
             </div>
           </div>
           <div className="user-info">

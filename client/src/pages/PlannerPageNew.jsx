@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { planner } from '../api';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
+import TabIcon from '../components/TabIcon';
 
-const plannerTabs = [{ id: 'gpr', label: 'ГПР' }];
+const plannerTabs = [{ id: 'gpr', label: 'ГПР', icon: 'grid' }];
 
 export default function PlannerPageNew({ user }) {
   const [objects, setObjects] = useState([]);
@@ -445,8 +446,13 @@ export default function PlannerPageNew({ user }) {
       <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         <div className="page-tabs">
           {plannerTabs.map((tab) => (
-            <button key={tab.id} className="page-tabs__button page-tabs__button--active">
-              {tab.label}
+            <button key={tab.id} className="page-tabs__button page-tabs__button--active" type="button">
+              {tab.icon && (
+                <span className="page-tabs__icon">
+                  <TabIcon name={tab.icon} size={18} />
+                </span>
+              )}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>

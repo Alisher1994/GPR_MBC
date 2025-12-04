@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { foreman, planner, auth } from '../api';
 import KanbanBoard from '../components/KanbanBoard';
+import TabIcon from '../components/TabIcon';
 
 const foremanTabs = [
-  { id: 'works', label: 'Работы' },
-  { id: 'kanban', label: 'Выполнения' },
-  { id: 'issues', label: 'Список замечаний' }
+  { id: 'works', label: 'Работы', icon: 'layers' },
+  { id: 'kanban', label: 'Выполнения', icon: 'kanban' },
+  { id: 'issues', label: 'Список замечаний', icon: 'clipboard' }
 ];
 
 export default function ForemanPageNew({ user }) {
@@ -254,7 +255,12 @@ export default function ForemanPageNew({ user }) {
             onClick={() => setActiveTab(tab.id)}
             type="button"
           >
-            {tab.label}
+            {tab.icon && (
+              <span className="page-tabs__icon">
+                <TabIcon name={tab.icon} size={18} />
+              </span>
+            )}
+            <span>{tab.label}</span>
             {tab.id === 'kanban' && (pendingApprovals.length + sentAssignments.length) > 0 && (
               <span style={{
                 marginLeft: '0.4rem',
