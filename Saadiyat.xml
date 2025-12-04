@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectData>
+    <Object Name="Тестовый объект">
+        
+        <Stage Name="Основной этап">
+            
+            <Section Name="Секция А">
+                
+                <Floor Name="Цокольный этаж">
+                    <WorkType Name="Устройство гидроизоляции фундамента" StartDate="2025-12-03" EndDate="2025-12-10" TotalVolume="450.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Кладка стен из газобетона" StartDate="2025-12-11" EndDate="2025-12-25" TotalVolume="380.00" CompletedVolume="0.00" Unit="м³"/>
+                    <WorkType Name="Монтаж вентиляционных каналов" StartDate="2025-12-15" EndDate="2025-12-28" TotalVolume="120.00" CompletedVolume="0.00" Unit="м.п."/>
+                </Floor>
+                
+                <Floor Name="1-й этаж">
+                    <WorkType Name="Монолитное перекрытие" StartDate="2025-12-26" EndDate="2026-01-08" TotalVolume="520.00" CompletedVolume="0.00" Unit="м³"/>
+                    <WorkType Name="Армирование плит перекрытия" StartDate="2025-12-23" EndDate="2026-01-05" TotalVolume="6.50" CompletedVolume="0.00" Unit="т"/>
+                    <WorkType Name="Устройство теплого пола" StartDate="2026-01-10" EndDate="2026-01-25" TotalVolume="480.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Монтаж витражного остекления" StartDate="2026-01-15" EndDate="2026-02-05" TotalVolume="85.00" CompletedVolume="0.00" Unit="м²"/>
+                </Floor>
+                
+                <Floor Name="2-й этаж">
+                    <WorkType Name="Штукатурка фасада" StartDate="2026-02-01" EndDate="2026-02-20" TotalVolume="920.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Монтаж подвесных потолков" StartDate="2026-02-10" EndDate="2026-02-28" TotalVolume="640.00" CompletedVolume="0.00" Unit="м²"/>
+                    <WorkType Name="Устройство кровли из металлочерепицы" StartDate="2026-02-22" EndDate="2026-03-15" TotalVolume="580.00" CompletedVolume="0.00" Unit="м²"/>
+                </Floor>
+                
+            </Section>
+            
+        </Stage>
+        
+    </Object>
+</ProjectData>

@@ -317,6 +317,30 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
             
             <div style={{
               width: '100%',
+              background: 'rgba(52, 199, 89, 0.08)',
+              borderRadius: '12px',
+              padding: '0.75rem',
+              textAlign: 'center'
+            }}>
+              <div style={{ 
+                fontSize: '1.5rem', 
+                fontWeight: '700', 
+                color: '#34c759'
+              }}>
+                {Math.round(percentage)}%
+              </div>
+              <div style={{ 
+                fontSize: '0.65rem', 
+                color: '#34c759',
+                fontWeight: '500',
+                marginTop: '0.15rem'
+              }}>
+                выполнение
+              </div>
+            </div>
+
+            <div style={{
+              width: '100%',
               background: 'rgba(255, 59, 48, 0.08)',
               borderRadius: '12px',
               padding: '0.75rem',

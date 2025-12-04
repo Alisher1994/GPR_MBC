@@ -28,15 +28,15 @@ export default function ForemanPageNew({ user }) {
 
   const columnHighlight = {
     completed: {
-      header: { background: '#ecfdf3' },
+      header: { background: '#ecfdf3', color: '#34c759', fontWeight: 600 },
       cell: { background: '#f7fdf9' }
     },
     assigned: {
-      header: { background: '#fff7ed' },
+      header: { background: '#fff7ed', color: '#ff9500', fontWeight: 600 },
       cell: { background: '#fffaf3' }
     },
     remaining: {
-      header: { background: '#ffeef0' },
+      header: { background: '#ffeef0', color: '#ff3b30', fontWeight: 600 },
       cell: { background: '#fff6f7' }
     }
   };

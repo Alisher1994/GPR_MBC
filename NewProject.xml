@@ -1,391 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Новый объект" start_date="2025-01-01" end_date="2025-12-31">
-  <stage name="Этап 1">
-    <section name="Секция 1">
-      <!-- -1 этаж -->
-      <floor name="-1 этаж">
-        <work>
-          <type>Устройство гидроизоляции фундамента</type>
-          <unit>м²</unit>
-          <total_volume>500</total_volume>
-          <start_date>2025-01-10</start_date>
-          <end_date>2025-02-10</end_date>
-        </work>
-        <work>
-          <type>Монтаж арматуры</type>
-          <unit>т</unit>
-          <total_volume>25</total_volume>
-          <start_date>2025-01-15</start_date>
-          <end_date>2025-02-15</end_date>
-        </work>
-        <work>
-          <type>Бетонирование фундаментной плиты</type>
-          <unit>м³</unit>
-          <total_volume>300</total_volume>
-          <start_date>2025-02-01</start_date>
-          <end_date>2025-03-01</end_date>
-        </work>
-      </floor>
-      <!-- Технический этаж -->
-      <floor name="Технический этаж">
-        <work>
-          <type>Прокладка инженерных коммуникаций</type>
-          <unit>м.п.</unit>
-          <total_volume>1200</total_volume>
-          <start_date>2025-02-15</start_date>
-          <end_date>2025-03-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж вентиляционных систем</type>
-          <unit>м²</unit>
-          <total_volume>400</total_volume>
-          <start_date>2025-03-01</start_date>
-          <end_date>2025-04-01</end_date>
-        </work>
-        <work>
-          <type>Электромонтажные работы</type>
-          <unit>т.м.</unit>
-          <total_volume>50</total_volume>
-          <start_date>2025-03-10</start_date>
-          <end_date>2025-04-10</end_date>
-        </work>
-      </floor>
-      <!-- 1 этаж -->
-      <floor name="1 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-03-01</start_date>
-          <end_date>2025-04-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-03-15</start_date>
-          <end_date>2025-04-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-04-01</start_date>
-          <end_date>2025-05-01</end_date>
-        </work>
-      </floor>
-      <!-- 2 этаж -->
-      <floor name="2 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-04-01</start_date>
-          <end_date>2025-05-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-04-15</start_date>
-          <end_date>2025-05-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-05-01</start_date>
-          <end_date>2025-06-01</end_date>
-        </work>
-      </floor>
-      <!-- 3 этаж -->
-      <floor name="3 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-05-01</start_date>
-          <end_date>2025-06-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-05-15</start_date>
-          <end_date>2025-06-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-06-01</start_date>
-          <end_date>2025-07-01</end_date>
-        </work>
-      </floor>
-      <!-- 4 этаж -->
-      <floor name="4 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-06-01</start_date>
-          <end_date>2025-07-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-06-15</start_date>
-          <end_date>2025-07-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-07-01</start_date>
-          <end_date>2025-08-01</end_date>
-        </work>
-      </floor>
-      <!-- 5 этаж -->
-      <floor name="5 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-07-01</start_date>
-          <end_date>2025-08-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-07-15</start_date>
-          <end_date>2025-08-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-08-01</start_date>
-          <end_date>2025-09-01</end_date>
-        </work>
-      </floor>
-      <!-- 6 этаж -->
-      <floor name="6 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-08-01</start_date>
-          <end_date>2025-09-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-08-15</start_date>
-          <end_date>2025-09-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-09-01</start_date>
-          <end_date>2025-10-01</end_date>
-        </work>
-      </floor>
-      <!-- 7 этаж -->
-      <floor name="7 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-09-01</start_date>
-          <end_date>2025-10-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-09-15</start_date>
-          <end_date>2025-10-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-10-01</start_date>
-          <end_date>2025-11-01</end_date>
-        </work>
-      </floor>
-      <!-- 8 этаж -->
-      <floor name="8 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-10-01</start_date>
-          <end_date>2025-11-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-10-15</start_date>
-          <end_date>2025-11-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-11-01</start_date>
-          <end_date>2025-12-01</end_date>
-        </work>
-      </floor>
-      <!-- 9 этаж -->
-      <floor name="9 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-11-01</start_date>
-          <end_date>2025-12-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-11-15</start_date>
-          <end_date>2025-12-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-12-01</start_date>
-          <end_date>2025-12-31</end_date>
-        </work>
-      </floor>
-      <!-- 10 этаж -->
-      <floor name="10 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2025-12-01</start_date>
-          <end_date>2025-12-31</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2025-12-10</start_date>
-          <end_date>2026-01-10</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2025-12-15</start_date>
-          <end_date>2026-01-15</end_date>
-        </work>
-      </floor>
-      <!-- 11 этаж -->
-      <floor name="11 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2026-01-01</start_date>
-          <end_date>2026-02-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2026-01-15</start_date>
-          <end_date>2026-02-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2026-02-01</start_date>
-          <end_date>2026-03-01</end_date>
-        </work>
-      </floor>
-      <!-- 12 этаж -->
-      <floor name="12 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2026-02-01</start_date>
-          <end_date>2026-03-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2026-02-15</start_date>
-          <end_date>2026-03-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2026-03-01</start_date>
-          <end_date>2026-04-01</end_date>
-        </work>
-      </floor>
-      <!-- 13 этаж -->
-      <floor name="13 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2026-03-01</start_date>
-          <end_date>2026-04-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2026-03-15</start_date>
-          <end_date>2026-04-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2026-04-01</start_date>
-          <end_date>2026-05-01</end_date>
-        </work>
-      </floor>
-      <!-- 14 этаж -->
-      <floor name="14 этаж">
-        <work>
-          <type>Кладка наружных стен</type>
-          <unit>м³</unit>
-          <total_volume>180</total_volume>
-          <start_date>2026-04-01</start_date>
-          <end_date>2026-05-01</end_date>
-        </work>
-        <work>
-          <type>Устройство перегородок</type>
-          <unit>м²</unit>
-          <total_volume>350</total_volume>
-          <start_date>2026-04-15</start_date>
-          <end_date>2026-05-15</end_date>
-        </work>
-        <work>
-          <type>Монтаж перекрытий</type>
-          <unit>м²</unit>
-          <total_volume>600</total_volume>
-          <start_date>2026-05-01</start_date>
-          <end_date>2026-06-01</end_date>
-        </work>
-      </floor>
-    </section>
-  </stage>
-</project>
+<ProjectData>
+  <Object Name="Новый объект" StartDate="2025-01-01" EndDate="2026-06-30">
+    <Stage Name="Этап 1">
+      <Section Name="Секция 1">
+        <Floor Name="-1 этаж">
+          <WorkType Name="Устройство гидроизоляции фундамента" Unit="м²" TotalVolume="500" StartDate="2025-01-10" EndDate="2025-02-10"/>
+          <WorkType Name="Монтаж арматуры" Unit="т" TotalVolume="25" StartDate="2025-01-15" EndDate="2025-02-15"/>
+          <WorkType Name="Бетонирование фундаментной плиты" Unit="м³" TotalVolume="300" StartDate="2025-02-01" EndDate="2025-03-01"/>
+        </Floor>
+        <Floor Name="Технический этаж">
+          <WorkType Name="Прокладка инженерных коммуникаций" Unit="м.п." TotalVolume="1200" StartDate="2025-02-15" EndDate="2025-03-15"/>
+          <WorkType Name="Монтаж вентиляционных систем" Unit="м²" TotalVolume="400" StartDate="2025-03-01" EndDate="2025-04-01"/>
+          <WorkType Name="Электромонтажные работы" Unit="т.м." TotalVolume="50" StartDate="2025-03-10" EndDate="2025-04-10"/>
+        </Floor>
+        <Floor Name="1 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-03-01" EndDate="2025-04-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-03-15" EndDate="2025-04-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-04-01" EndDate="2025-05-01"/>
+        </Floor>
+        <Floor Name="2 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-04-01" EndDate="2025-05-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-04-15" EndDate="2025-05-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-05-01" EndDate="2025-06-01"/>
+        </Floor>
+        <Floor Name="3 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-05-01" EndDate="2025-06-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-05-15" EndDate="2025-06-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-06-01" EndDate="2025-07-01"/>
+        </Floor>
+        <Floor Name="4 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-06-01" EndDate="2025-07-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-06-15" EndDate="2025-07-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-07-01" EndDate="2025-08-01"/>
+        </Floor>
+        <Floor Name="5 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-07-01" EndDate="2025-08-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-07-15" EndDate="2025-08-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-08-01" EndDate="2025-09-01"/>
+        </Floor>
+        <Floor Name="6 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-08-01" EndDate="2025-09-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-08-15" EndDate="2025-09-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-09-01" EndDate="2025-10-01"/>
+        </Floor>
+        <Floor Name="7 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-09-01" EndDate="2025-10-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-09-15" EndDate="2025-10-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-10-01" EndDate="2025-11-01"/>
+        </Floor>
+        <Floor Name="8 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-10-01" EndDate="2025-11-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-10-15" EndDate="2025-11-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-11-01" EndDate="2025-12-01"/>
+        </Floor>
+        <Floor Name="9 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-11-01" EndDate="2025-12-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-11-15" EndDate="2025-12-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-12-01" EndDate="2025-12-31"/>
+        </Floor>
+        <Floor Name="10 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2025-12-01" EndDate="2025-12-31"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2025-12-10" EndDate="2026-01-10"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2025-12-15" EndDate="2026-01-15"/>
+        </Floor>
+        <Floor Name="11 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2026-01-01" EndDate="2026-02-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2026-01-15" EndDate="2026-02-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2026-02-01" EndDate="2026-03-01"/>
+        </Floor>
+        <Floor Name="12 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2026-02-01" EndDate="2026-03-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2026-02-15" EndDate="2026-03-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2026-03-01" EndDate="2026-04-01"/>
+        </Floor>
+        <Floor Name="13 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2026-03-01" EndDate="2026-04-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2026-03-15" EndDate="2026-04-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2026-04-01" EndDate="2026-05-01"/>
+        </Floor>
+        <Floor Name="14 этаж">
+          <WorkType Name="Кладка наружных стен" Unit="м³" TotalVolume="180" StartDate="2026-04-01" EndDate="2026-05-01"/>
+          <WorkType Name="Устройство перегородок" Unit="м²" TotalVolume="350" StartDate="2026-04-15" EndDate="2026-05-15"/>
+          <WorkType Name="Монтаж перекрытий" Unit="м²" TotalVolume="600" StartDate="2026-05-01" EndDate="2026-06-01"/>
+        </Floor>
+      </Section>
+    </Stage>
+  </Object>
+</ProjectData>
