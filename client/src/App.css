@@ -356,6 +356,49 @@ body.modal-open {
   background: #fff;
 }
 
+.gantt-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1300;
+  display: flex;
+}
+
+.gantt-fullscreen-panel {
+  background: #fff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 2rem;
+  border-radius: 0;
+}
+
+.gantt-fullscreen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gantt-fullscreen-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.gantt-fullscreen-body .gantt-chart-container {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .gantt-fullscreen-panel {
+    padding: 1rem;
+  }
+}
+
 .gantt-plan-bar .bar {
   fill: #d8f3dc; /* пастельный зелёный для плана */
   stroke: #9dd9b5;

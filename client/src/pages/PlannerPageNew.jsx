@@ -835,9 +835,9 @@ export default function PlannerPageNew({ user }) {
       </div>
 
       {showGanttModal && (
-        <div className="modal-overlay" style={{ zIndex: 1200 }}>
-          <div className="modal-content" style={{ maxWidth: '1100px', width: '95%', borderRadius: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', gap: '1rem' }}>
+        <div className="gantt-fullscreen-overlay">
+          <div className="gantt-fullscreen-panel">
+            <div className="gantt-fullscreen-header">
               <div>
                 <h3 style={{ margin: 0 }}>График секции {selectedSection ? selectedSection.section_number : ''}</h3>
                 {selectedObject && selectedSection && (
@@ -851,39 +851,42 @@ export default function PlannerPageNew({ user }) {
                 style={{
                   border: 'none',
                   background: 'rgba(142,142,147,0.16)',
-                  width: '34px',
-                  height: '34px',
+                  width: '38px',
+                  height: '38px',
                   borderRadius: '50%',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '1.1rem'
                 }}
               >
                 ✕
               </button>
             </div>
 
-            {ganttLoading ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
-            ) : ganttError ? (
-              <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
-            ) : ganttWorks.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
-                Нет работ для построения графика. Загрузите XML и распределите задания.
-              </div>
-            ) : (
-              <>
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#d8f3dc', border: '1px solid #9dd9b5' }}></span>
-                    <span style={{ fontSize: '0.85rem', color: '#525252' }}>План</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#1f6f4d' }}></span>
-                    <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
-                  </div>
+            <div className="gantt-fullscreen-body">
+              {ganttLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
+              ) : ganttError ? (
+                <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
+              ) : ganttWorks.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
+                  Нет работ для построения графика. Загрузите XML и распределите задания.
                 </div>
-                <div className="gantt-chart-container" ref={ganttContainerRef}></div>
-              </>
-            )}
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#d8f3dc', border: '1px solid #9dd9b5' }}></span>
+                      <span style={{ fontSize: '0.85rem', color: '#525252' }}>План</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#1f6f4d' }}></span>
+                      <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
+                    </div>
+                  </div>
+                  <div className="gantt-chart-container" ref={ganttContainerRef} style={{ flex: 1 }}></div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
