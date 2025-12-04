@@ -53,7 +53,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
     const percent = Math.max(0, Math.min(100, (y / height) * 100));
     const calculatedVolume = (percent / 100) * remaining;
     
-    setVolume(Math.round(calculatedVolume * 100) / 100);
+    setVolume(Math.round(calculatedVolume * 10) / 10);
   };
 
   const handleTouchMove = (e) => {
@@ -68,7 +68,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
     const percent = Math.max(0, Math.min(100, (y / height) * 100));
     const calculatedVolume = (percent / 100) * remaining;
     
-    setVolume(Math.round(calculatedVolume * 100) / 100);
+    setVolume(Math.round(calculatedVolume * 10) / 10);
   };
 
   const handleSubmit = () => {
@@ -164,14 +164,14 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
           marginBottom: '1.5rem' 
         }}>
           <div style={{
-            background: 'rgba(0, 122, 255, 0.08)',
+            background: 'rgba(255, 149, 0, 0.08)',
             borderRadius: '12px',
             padding: '0.75rem',
           }}>
-            <div style={{ fontSize: '0.75rem', color: '#8e8e93', fontWeight: '500', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: '#ff9500', fontWeight: '500', marginBottom: '0.25rem' }}>
               Назначено
             </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '600', color: '#007aff' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: '600', color: '#ff9500' }}>
               {maxVolume} <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{assignment.unit}</span>
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
             borderRadius: '12px',
             padding: '0.75rem',
           }}>
-            <div style={{ fontSize: '0.75rem', color: '#8e8e93', fontWeight: '500', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: '#34c759', fontWeight: '500', marginBottom: '0.25rem' }}>
               Выполнено
             </div>
             <div style={{ fontSize: '1.4rem', fontWeight: '600', color: '#34c759' }}>
@@ -317,7 +317,7 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
             
             <div style={{
               width: '100%',
-              background: 'rgba(120, 120, 128, 0.12)',
+              background: 'rgba(255, 59, 48, 0.08)',
               borderRadius: '12px',
               padding: '0.75rem',
               textAlign: 'center'
@@ -325,17 +325,17 @@ export default function VolumeSlider({ assignment, onSubmit, onClose }) {
               <div style={{ 
                 fontSize: '1.5rem', 
                 fontWeight: '700', 
-                color: '#007aff'
+                color: '#ff3b30'
               }}>
-                {Math.round(percentage)}%
+                {Math.round((remaining - volume) * 10) / 10}
               </div>
               <div style={{ 
                 fontSize: '0.65rem', 
-                color: '#8e8e93',
+                color: '#ff3b30',
                 fontWeight: '500',
                 marginTop: '0.15rem'
               }}>
-                от остатка
+                остаток {assignment.unit}
               </div>
             </div>
           </div>

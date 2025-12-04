@@ -175,7 +175,7 @@ export default function SubcontractorPage({ user }) {
                                 className="btn btn-small btn-success"
                                 onClick={() => setSelectedAssignment(assignment)}
                               >
-                                📊 Отметить
+                                Отметить
                               </button>
                             ) : (
                               <span style={{ color: '#999', fontSize: '0.9rem' }}>
