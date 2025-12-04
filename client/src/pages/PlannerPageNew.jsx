@@ -523,7 +523,8 @@ export default function PlannerPageNew({ user }) {
                       border: selectedObject?.id === obj.id ? '2px solid #007aff' : '2px solid transparent',
                       boxShadow: selectedObject?.id === obj.id 
                         ? '0 4px 12px rgba(0,122,255,0.3)' 
-                        : '0 2px 4px rgba(0,0,0,0.05)'
+                        : '0 2px 4px rgba(0,0,0,0.05)',
+                      minHeight: '88px'
                     }}
                   >
                     <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -616,7 +617,8 @@ export default function PlannerPageNew({ user }) {
                       border: selectedSection?.id === section.id ? '2px solid #34c759' : '2px solid transparent',
                       boxShadow: selectedSection?.id === section.id 
                         ? '0 4px 12px rgba(52,199,89,0.3)' 
-                        : '0 2px 4px rgba(0,0,0,0.05)'
+                        : '0 2px 4px rgba(0,0,0,0.05)',
+                      minHeight: '88px'
                     }}
                   >
                     <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -683,9 +685,13 @@ export default function PlannerPageNew({ user }) {
                         border: '1px solid rgba(0,0,0,0.1)',
                         background: '#fff',
                         color: '#1c1c1e',
-                        cursor: ganttLoading ? 'not-allowed' : 'pointer'
+                        cursor: ganttLoading ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
                       }}
                     >
+                      <TabIcon name="chart" size={16} />
                       {ganttLoading ? 'График...' : 'График'}
                     </button>
                     <button
@@ -699,9 +705,13 @@ export default function PlannerPageNew({ user }) {
                         border: 'none',
                         background: '#007aff',
                         color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer'
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
                       }}
                     >
+                      <TabIcon name="download" size={16} />
                       {exporting === 'full' ? 'Экспорт...' : 'Выгрузить проект'}
                     </button>
                     <button
@@ -715,22 +725,31 @@ export default function PlannerPageNew({ user }) {
                         border: 'none',
                         background: '#30d158',
                         color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer'
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
                       }}
                     >
+                      <TabIcon name="download" size={16} />
                       {exporting === 'actual' ? 'Экспорт фактов...' : 'Выгрузить факты'}
                     </button>
                     <label 
-                      className="btn btn-success btn-small"
                       style={{
-                        padding: '0.5rem 1rem',
-                        fontSize: '0.9rem',
+                        padding: '0.5rem 0.9rem',
+                        fontSize: '0.85rem',
                         fontWeight: '600',
                         borderRadius: '10px',
                         cursor: loading ? 'not-allowed' : 'pointer',
-                        opacity: loading ? 0.6 : 1
+                        opacity: loading ? 0.6 : 1,
+                        background: '#30d158',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
                       }}
                     >
+                      <TabIcon name="upload" size={16} />
                       {loading ? 'Загрузка...' : 'Загрузить XML'}
                       <input
                         type="file"
@@ -756,90 +775,79 @@ export default function PlannerPageNew({ user }) {
                   <span>Загрузите актуальный XML.</span>
                 </div>
               ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid #e5e5ea' }}>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>№</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Дата / Время</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Название файла</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Размер</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Кем добавлен</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Статус</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {xmlFiles.map((file, index) => (
-                      <tr 
-                        key={file.id} 
-                        style={{ 
-                          borderBottom: '1px solid #f0f0f0',
-                          background: file.status === 'active' ? 'rgba(52,199,89,0.05)' : 'transparent'
+                <div style={listContainerStyle}>
+                  {xmlFiles.map((file, index) => {
+                    const isActive = file.status === 'active';
+                    return (
+                      <div
+                        key={file.id}
+                        style={{
+                          padding: '1rem',
+                          borderRadius: '12px',
+                          background: isActive ? '#f9f9f9' : '#e8e8e8',
+                          color: isActive ? '#1c1c1e' : '#999',
+                          border: isActive ? '2px solid transparent' : '2px solid #d0d0d0',
+                          boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                          minHeight: '88px',
+                          opacity: isActive ? 1 : 0.7
                         }}
                       >
-                        <td style={{ padding: '0.75rem', fontSize: '0.9rem' }}>{index + 1}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{formatDateTime(file.uploaded_at)}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: '500' }}>{file.filename}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#8e8e93' }}>{formatFileSize(file.file_size)}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{file.uploaded_by_name || '-'}</td>
-                        <td style={{ padding: '0.75rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                          <div style={{ fontWeight: '600', fontSize: '1rem', color: isActive ? '#1c1c1e' : '#888' }}>
+                            {file.filename}
+                          </div>
                           <span style={{
-                            padding: '0.25rem 0.6rem',
-                            borderRadius: '8px',
-                            fontSize: '0.75rem',
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
                             fontWeight: '600',
-                            background: file.status === 'active' ? '#34c759' : 
-                                       file.status === 'replaced' ? '#ff9500' : '#ff3b30',
+                            background: isActive ? '#34c759' : '#aaa',
                             color: '#fff'
                           }}>
-                            {file.status === 'active' ? 'Активен' : 
-                             file.status === 'replaced' ? 'Заменён' : 'Удалён'}
+                            {isActive ? 'Активен' : file.status === 'replaced' ? 'Заменён' : 'Удалён'}
                           </span>
-                        </td>
-                        <td style={{ padding: '0.75rem' }}>
-                          {file.status === 'active' && (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button
-                                onClick={() => handleReplaceFile(file.id)}
-                                style={{
-                                  padding: '0.4rem 0.75rem',
-                                  fontSize: '0.8rem',
-                                  background: '#007aff',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: '600'
-                                }}
-                              >
-                                Заменить
-                              </button>
-                              <button
-                                onClick={() => handleDeleteFile(file.id)}
-                                style={{
-                                  padding: '0.4rem 0.75rem',
-                                  fontSize: '0.8rem',
-                                  background: '#ff3b30',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: '600'
-                                }}
-                              >
-                                Удалить
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    </tbody>
-                  </table>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.85, marginBottom: '0.5rem', color: isActive ? '#1c1c1e' : '#999' }}>
+                          {formatDateTime(file.uploaded_at)} • {formatFileSize(file.file_size)} • {file.uploaded_by_name || '-'}
+                        </div>
+                        {isActive && (
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            <button
+                              onClick={() => handleReplaceFile(file.id)}
+                              style={{
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.75rem',
+                                background: '#007aff',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                              }}
+                            >
+                              Заменить
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFile(file.id)}
+                              style={{
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.75rem',
+                                background: '#ff3b30',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                              }}
+                            >
+                              Удалить
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
               )}
             </div>
           </div>

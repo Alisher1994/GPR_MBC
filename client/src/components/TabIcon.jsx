@@ -83,6 +83,55 @@ const icons = {
       <path d="M5 12h.01" />
       <path d="M5 17h.01" />
     </svg>
+  ),
+  chart: (size) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3v18h18" />
+      <path d="M7 12h2v5H7z" />
+      <path d="M12 8h2v9h-2z" />
+      <path d="M17 5h2v12h-2z" />
+    </svg>
+  ),
+  download: (size) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 5v10" />
+      <path d="m8 11 4 4 4-4" />
+      <path d="M4 19h16" />
+    </svg>
+  ),
+  upload: (size) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 15V5" />
+      <path d="m8 9 4-4 4 4" />
+      <path d="M4 19h16" />
+    </svg>
   )
 };
 
