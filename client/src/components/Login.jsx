@@ -1,5 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { auth } from '../api';
+
+// Галерея проектов
+const projects = [
+  {
+    id: 1,
+    name: 'ЖК Tabiat Residence',
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80',
+    description: 'Современный жилой комплекс с уникальной архитектурой'
+  },
+  {
+    id: 2,
+    name: 'ЖК Regnum Plaza',
+    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80',
+    description: 'Премиальный комплекс в центре города'
+  },
+  {
+    id: 3,
+    name: 'ЖК Saadiyat',
+    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80',
+    description: 'Остров счастья — место, где счастливая жизнь'
+  }
+];
 
 export default function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -9,6 +31,39 @@ export default function Login({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  // Автопереключение слайдов как в сторис
+  useEffect(() => {
+    const slideDuration = 5000; // 5 секунд на слайд
+    const progressInterval = 50; // обновление прогресса каждые 50мс
+    
+    const progressTimer = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          return 0;
+        }
+        return prev + (100 / (slideDuration / progressInterval));
+      });
+    }, progressInterval);
+
+    const slideTimer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % projects.length);
+      setProgress(0);
+    }, slideDuration);
+
+    return () => {
+      clearInterval(progressTimer);
+      clearInterval(slideTimer);
+    };
+  }, []);
+
+  // Переключение слайда по клику на индикатор
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+    setProgress(0);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,8 +101,150 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="auth-container" style={{
+      backgroundImage: `url(${projects[currentSlide].image})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      transition: 'background-image 0.8s ease-in-out'
+    }}>
+      {/* Overlay для затемнения */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
+        zIndex: 0
+      }} />
+
+      {/* Story-style progress bars */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        right: '20px',
+        display: 'flex',
+        gap: '6px',
+        zIndex: 10
+      }}>
+        {projects.map((_, index) => (
+          <div
+            key={index}
+            onClick={() => goToSlide(index)}
+            style={{
+              flex: 1,
+              height: '3px',
+              background: 'rgba(255,255,255,0.3)',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{
+              height: '100%',
+              background: '#fff',
+              borderRadius: '2px',
+              width: index < currentSlide ? '100%' : 
+                     index === currentSlide ? `${progress}%` : '0%',
+              transition: index === currentSlide ? 'none' : 'width 0.3s ease'
+            }} />
+          </div>
+        ))}
+      </div>
+
+      {/* Project info overlay */}
+      <div style={{
+        position: 'absolute',
+        top: '50px',
+        left: '30px',
+        zIndex: 10,
+        color: '#fff',
+        maxWidth: '400px'
+      }}>
+        <p style={{ 
+          fontSize: '0.85rem', 
+          opacity: 0.8, 
+          marginBottom: '0.5rem',
+          textTransform: 'uppercase',
+          letterSpacing: '2px'
+        }}>
+          Проект
+        </p>
+        <h2 style={{ 
+          fontSize: '2rem', 
+          fontWeight: '700', 
+          marginBottom: '1rem',
+          textShadow: '0 2px 10px rgba(0,0,0,0.3)'
+        }}>
+          {projects[currentSlide].name}
+        </h2>
+        <p style={{ 
+          fontSize: '0.95rem', 
+          opacity: 0.9,
+          lineHeight: 1.6,
+          textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+        }}>
+          {projects[currentSlide].description}
+        </p>
+      </div>
+
+      {/* Phone-style gallery preview */}
+      <div style={{
+        position: 'absolute',
+        bottom: '40px',
+        left: '30px',
+        display: 'flex',
+        gap: '12px',
+        zIndex: 10
+      }}>
+        {projects.map((project, index) => (
+          <div
+            key={project.id}
+            onClick={() => goToSlide(index)}
+            style={{
+              width: index === currentSlide ? '100px' : '80px',
+              height: index === currentSlide ? '140px' : '110px',
+              borderRadius: index === currentSlide ? '20px' : '16px',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              border: index === currentSlide ? '3px solid #fff' : '2px solid rgba(255,255,255,0.5)',
+              boxShadow: index === currentSlide 
+                ? '0 8px 32px rgba(0,0,0,0.4)' 
+                : '0 4px 16px rgba(0,0,0,0.3)',
+              transition: 'all 0.3s ease',
+              position: 'relative',
+              transform: index === currentSlide ? 'translateY(-10px)' : 'none'
+            }}
+          >
+            <img 
+              src={project.image} 
+              alt={project.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '8px',
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+              color: '#fff',
+              fontSize: '0.65rem',
+              fontWeight: '600'
+            }}>
+              {project.name}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Auth card */}
+      <div className="auth-card" style={{ zIndex: 5, position: 'relative' }}>
         {isRegister ? (
           <h2>Регистрация</h2>
         ) : (
