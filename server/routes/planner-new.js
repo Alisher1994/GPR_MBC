@@ -462,10 +462,4 @@ router.get('/sections/:sectionId/export-completed', async (req, res) => {
   }
 });
 
-  } catch (error) {
-    console.error('Ошибка экспорта завершенных работ:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 export default router;
