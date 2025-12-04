@@ -67,21 +67,6 @@ body.modal-open {
   padding: 0 2rem;
 }
 
-.planner-primavera {
-  background: #f4f1ea;
-  color: #1f1f1f;
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
-}
-
-.planner-primavera h2,
-.planner-primavera h3 {
-  color: #2f2a1f;
-}
-
-.planner-primavera strong {
-  color: #2f2a1f;
-}
-
 /* Auth pages */
 .auth-container {
   min-height: 100vh;
@@ -152,30 +137,28 @@ body.modal-open {
 }
 
 .btn-primary {
-  background: linear-gradient(130deg, #1f4f7b 0%, #2f74b5 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   width: 100%;
-  box-shadow: 0 10px 24px rgba(31,79,123,0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(31,79,123,0.4);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-secondary {
-  background: #c7bca5;
-  color: #2f2a20;
+  background: #6c757d;
+  color: white;
 }
 
 .btn-success {
-  background: linear-gradient(130deg, #2d8a5f, #3fb178);
+  background: #28a745;
   color: white;
-  box-shadow: 0 10px 24px rgba(46,138,96,0.3);
 }
 
 .btn-danger {
-  background: #b4443f;
+  background: #dc3545;
   color: white;
 }
 
@@ -363,54 +346,6 @@ body.modal-open {
   -webkit-overflow-scrolling: touch;
 }
 
-.gantt-chart-container {
-  width: 100%;
-  min-height: 420px;
-  overflow: auto;
-  border: 1px solid #d9d2c2;
-  border-radius: 16px;
-  padding: 0.5rem;
-  background: #fefbf4;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-}
-
-.gantt-fullscreen-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 1300;
-  display: flex;
-}
-
-.gantt-fullscreen-panel {
-  background: #fff;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 2rem;
-  border-radius: 0;
-}
-
-.gantt-fullscreen-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gantt-fullscreen-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.gantt-fullscreen-body .gantt-chart-container {
-  flex: 1;
-  min-height: 0;
-}
-
 .gantt-modal-overlay {
   padding: 0;
 }
@@ -425,7 +360,12 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fdfbf5;
+}
+
+@media (max-width: 768px) {
+  .gantt-modal-content {
+    padding: 1rem;
+  }
 }
 
 .gantt-modal-header {
@@ -435,7 +375,7 @@ body.modal-open {
   gap: 1rem;
   position: sticky;
   top: 0;
-  background: #fdfbf5;
+  background: #fff;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(0,0,0,0.08);
   z-index: 5;
@@ -443,7 +383,7 @@ body.modal-open {
 
 .gantt-modal-close {
   border: none;
-  background: rgba(31,79,123,0.12);
+  background: rgba(142,142,147,0.18);
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -452,11 +392,10 @@ body.modal-open {
   line-height: 1;
   flex-shrink: 0;
   transition: background 0.2s ease;
-  color: #1f4f7b;
 }
 
 .gantt-modal-close:hover {
-  background: rgba(31,79,123,0.25);
+  background: rgba(142,142,147,0.3);
 }
 
 .gantt-modal-body {
@@ -473,7 +412,7 @@ body.modal-open {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #6f6251;
+  color: #8e8e93;
   padding: 2rem;
 }
 
@@ -497,10 +436,14 @@ body.modal-open {
   min-height: 0;
 }
 
-@media (max-width: 768px) {
-  .gantt-fullscreen-panel {
-    padding: 1rem;
-  }
+.gantt-chart-container {
+  width: 100%;
+  min-height: 420px;
+  overflow: auto;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 0.5rem;
+  background: #fff;
 }
 
 .gantt-plan-bar .bar {
