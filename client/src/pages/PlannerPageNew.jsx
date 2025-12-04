@@ -27,23 +27,29 @@ export default function PlannerPageNew({ user }) {
   const ganttContainerRef = useRef(null);
   const ganttInstanceRef = useRef(null);
 
-  const columnContainerStyle = {
-    background: '#fff',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden'
+  const primaveraPalette = {
+    background: '#f4f1ea',
+    panel: '#fdfbf5',
+    border: '#d9d2c2',
+    primary: '#1f4f7b',
+    primaryLight: '#2a6da8',
+    accent: '#c28f2c',
+    text: '#1f1f1f',
+    muted: '#6f6251',
+    cardHover: '#f1e8d7',
+    success: '#2d8a5f'
   };
 
-  const layoutGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: '340px 340px minmax(560px, 1fr)',
-    gap: '1.5rem',
-    alignItems: 'stretch',
-    height: 'calc(100vh - 5rem)'
+  const columnContainerStyle = {
+    background: primaveraPalette.panel,
+    borderRadius: '18px',
+    padding: '1.5rem',
+    boxShadow: '0 15px 35px rgba(31,79,123,0.08)',
+    border: `1px solid ${primaveraPalette.border}`,
+    display: 'flex',
+    flexDirection: 'column',
+    height: 'calc(100vh - 5.5rem)',
+    overflow: 'hidden'
   };
 
   const headerRowStyle = {
@@ -52,7 +58,7 @@ export default function PlannerPageNew({ user }) {
     alignItems: 'center',
     marginBottom: '1.25rem',
     paddingBottom: '1rem',
-    borderBottom: '2px solid #f0f0f0',
+    borderBottom: '1px solid rgba(31,79,123,0.12)',
     gap: '1rem',
     flexWrap: 'wrap'
   };
@@ -60,16 +66,16 @@ export default function PlannerPageNew({ user }) {
   const listContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem',
+    gap: '0.85rem',
     flex: 1,
     overflowY: 'auto',
-    paddingRight: '0.25rem'
+    paddingRight: '0.35rem'
   };
 
   const emptyStateStyle = {
     textAlign: 'center',
     padding: '2rem 1rem',
-    color: '#8e8e93',
+    color: primaveraPalette.muted,
     fontSize: '0.9rem',
     flex: 1,
     display: 'flex',
@@ -80,10 +86,10 @@ export default function PlannerPageNew({ user }) {
   };
 
   const badgeStyle = {
-    background: '#e5e5ea',
-    color: '#1c1c1e',
-    borderRadius: '8px',
-    padding: '0.15rem 0.5rem',
+    background: '#f0e5cf',
+    color: '#5b4a33',
+    borderRadius: '999px',
+    padding: '0.2rem 0.7rem',
     fontSize: '0.85rem',
     fontWeight: '600'
   };
@@ -447,15 +453,15 @@ export default function PlannerPageNew({ user }) {
   };
 
   return (
-    <div style={{ background: '#f5f5f7', minHeight: '100vh', padding: '1.5rem' }}>
-      <div style={{ maxWidth: '1800px', margin: '0 auto' }}>
-        <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: '#1c1c1e' }}>
+    <div className="planner-primavera" style={{ background: primaveraPalette.background, minHeight: '100vh', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '2rem', fontWeight: '700', color: primaveraPalette.primary }}>
           Панель плановика
         </h2>
 
         {error && (
           <div style={{
-            background: '#ff3b30',
+            background: '#b4443f',
             color: '#fff',
             padding: '1rem',
             borderRadius: '12px',
@@ -465,7 +471,13 @@ export default function PlannerPageNew({ user }) {
           </div>
         )}
 
-        <div style={layoutGridStyle}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '320px 320px 1fr', 
+          gap: '1.5rem',
+          alignItems: 'stretch',
+          height: 'calc(100vh - 4rem)'
+        }}>
           
           {/* КОЛОНКА 1: ОБЪЕКТЫ */}
           <div style={{ ...columnContainerStyle }}>
@@ -480,7 +492,7 @@ export default function PlannerPageNew({ user }) {
                 className="btn btn-primary btn-small"
                 onClick={() => setShowObjectModal(true)}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.55rem 1.15rem',
                   fontSize: '0.9rem',
                   fontWeight: '600',
                   borderRadius: '10px'
@@ -503,17 +515,20 @@ export default function PlannerPageNew({ user }) {
                     onClick={() => setSelectedObject(obj)}
                     style={{
                       padding: '1rem',
-                      borderRadius: '12px',
+                      borderRadius: '14px',
                       cursor: 'pointer',
                       background: selectedObject?.id === obj.id 
-                        ? 'linear-gradient(135deg, #007aff, #5ac8fa)' 
-                        : '#f9f9f9',
-                      color: selectedObject?.id === obj.id ? '#fff' : '#1c1c1e',
+                        ? 'linear-gradient(130deg, #1f4f7b, #2f74b5)' 
+                        : primaveraPalette.panel,
+                      color: selectedObject?.id === obj.id ? '#fefefe' : primaveraPalette.text,
                       transition: 'all 0.2s ease',
-                      border: selectedObject?.id === obj.id ? '2px solid #007aff' : '2px solid transparent',
+                      border: selectedObject?.id === obj.id 
+                        ? `1px solid ${primaveraPalette.primary}`
+                        : `1px solid ${primaveraPalette.border}`,
                       boxShadow: selectedObject?.id === obj.id 
-                        ? '0 4px 12px rgba(0,122,255,0.3)' 
-                        : '0 2px 4px rgba(0,0,0,0.05)'
+                        ? '0 12px 25px rgba(31,79,123,0.35)' 
+                        : '0 6px 18px rgba(0,0,0,0.05)',
+                      position: 'relative'
                     }}
                   >
                     <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -526,7 +541,9 @@ export default function PlannerPageNew({ user }) {
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span>Секций: {obj.sections_count || 0}</span>
+                      <span style={{ color: selectedObject?.id === obj.id ? 'rgba(255,255,255,0.9)' : primaveraPalette.muted }}>
+                        Секций: {obj.sections_count || 0}
+                      </span>
                       {selectedObject?.id === obj.id && (
                         <button
                           onClick={(e) => {
@@ -534,9 +551,9 @@ export default function PlannerPageNew({ user }) {
                             handleDeleteObject(obj.id);
                           }}
                           style={{
-                            padding: '0.25rem 0.5rem',
+                            padding: '0.3rem 0.6rem',
                             fontSize: '0.75rem',
-                            background: 'rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.18)',
                             border: 'none',
                             borderRadius: '6px',
                             color: '#fff',
@@ -568,7 +585,7 @@ export default function PlannerPageNew({ user }) {
                   className="btn btn-primary btn-small"
                   onClick={() => setShowSectionModal(true)}
                   style={{
-                    padding: '0.5rem 1rem',
+                    padding: '0.55rem 1.15rem',
                     fontSize: '0.9rem',
                     fontWeight: '600',
                     borderRadius: '10px'
@@ -596,17 +613,19 @@ export default function PlannerPageNew({ user }) {
                     onClick={() => setSelectedSection(section)}
                     style={{
                       padding: '1rem',
-                      borderRadius: '12px',
+                      borderRadius: '14px',
                       cursor: 'pointer',
                       background: selectedSection?.id === section.id 
-                        ? 'linear-gradient(135deg, #34c759, #30d158)' 
-                        : '#f9f9f9',
-                      color: selectedSection?.id === section.id ? '#fff' : '#1c1c1e',
+                        ? 'linear-gradient(130deg, #2d8a5f, #3fb178)' 
+                        : primaveraPalette.panel,
+                      color: selectedSection?.id === section.id ? '#fefefe' : primaveraPalette.text,
                       transition: 'all 0.2s ease',
-                      border: selectedSection?.id === section.id ? '2px solid #34c759' : '2px solid transparent',
+                      border: selectedSection?.id === section.id 
+                        ? '1px solid #2d8a5f'
+                        : `1px solid ${primaveraPalette.border}`,
                       boxShadow: selectedSection?.id === section.id 
-                        ? '0 4px 12px rgba(52,199,89,0.3)' 
-                        : '0 2px 4px rgba(0,0,0,0.05)'
+                        ? '0 12px 24px rgba(45,138,95,0.3)' 
+                        : '0 6px 18px rgba(0,0,0,0.05)'
                     }}
                   >
                     <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -630,9 +649,9 @@ export default function PlannerPageNew({ user }) {
                             handleDeleteSection(section.id);
                           }}
                           style={{
-                            padding: '0.25rem 0.5rem',
+                            padding: '0.3rem 0.6rem',
                             fontSize: '0.75rem',
-                            background: 'rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.18)',
                             border: 'none',
                             borderRadius: '6px',
                             color: '#fff',
@@ -666,14 +685,15 @@ export default function PlannerPageNew({ user }) {
                       onClick={handleShowGantt}
                       disabled={ganttLoading}
                       style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
+                        padding: '0.55rem 1rem',
+                        borderRadius: '12px',
                         fontSize: '0.85rem',
                         fontWeight: '600',
-                        border: '1px solid rgba(0,0,0,0.1)',
-                        background: '#fff',
-                        color: '#1c1c1e',
-                        cursor: ganttLoading ? 'not-allowed' : 'pointer'
+                        border: `1px solid ${primaveraPalette.border}`,
+                        background: '#fdf6ea',
+                        color: primaveraPalette.primary,
+                        cursor: ganttLoading ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.05)'
                       }}
                     >
                       {ganttLoading ? 'График...' : 'График'}
@@ -682,14 +702,15 @@ export default function PlannerPageNew({ user }) {
                       onClick={() => handleExportSection('full')}
                       disabled={exporting !== null}
                       style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
+                        padding: '0.55rem 1rem',
+                        borderRadius: '12px',
                         fontSize: '0.85rem',
                         fontWeight: '600',
                         border: 'none',
-                        background: '#007aff',
+                        background: 'linear-gradient(130deg, #1f4f7b, #2f74b5)',
                         color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer'
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 10px 22px rgba(31,79,123,0.35)'
                       }}
                     >
                       {exporting === 'full' ? 'Экспорт...' : 'Выгрузить проект'}
@@ -698,14 +719,15 @@ export default function PlannerPageNew({ user }) {
                       onClick={() => handleExportSection('actual')}
                       disabled={exporting !== null}
                       style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
+                        padding: '0.55rem 1rem',
+                        borderRadius: '12px',
                         fontSize: '0.85rem',
                         fontWeight: '600',
                         border: 'none',
-                        background: '#30d158',
+                        background: 'linear-gradient(130deg, #2d8a5f, #3fb178)',
                         color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer'
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 10px 22px rgba(46,138,96,0.35)'
                       }}
                     >
                       {exporting === 'actual' ? 'Экспорт фактов...' : 'Выгрузить факты'}
@@ -747,87 +769,101 @@ export default function PlannerPageNew({ user }) {
                 </div>
               ) : (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ overflowX: 'auto', flex: 1 }}>
-                    <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid #e5e5ea' }}>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>№</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Дата / Время</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Название файла</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Размер</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Кем добавлен</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Статус</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', fontSize: '0.9rem', color: '#8e8e93' }}>Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {xmlFiles.map((file, index) => (
-                      <tr 
-                        key={file.id} 
-                        style={{ 
-                          borderBottom: '1px solid #f0f0f0',
-                          background: file.status === 'active' ? 'rgba(52,199,89,0.05)' : 'transparent'
-                        }}
-                      >
-                        <td style={{ padding: '0.75rem', fontSize: '0.9rem' }}>{index + 1}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{formatDateTime(file.uploaded_at)}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: '500' }}>{file.filename}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#8e8e93' }}>{formatFileSize(file.file_size)}</td>
-                        <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{file.uploaded_by_name || '-'}</td>
-                        <td style={{ padding: '0.75rem' }}>
-                          <span style={{
-                            padding: '0.25rem 0.6rem',
-                            borderRadius: '8px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            background: file.status === 'active' ? '#34c759' : 
-                                       file.status === 'replaced' ? '#ff9500' : '#ff3b30',
-                            color: '#fff'
-                          }}>
-                            {file.status === 'active' ? 'Активен' : 
-                             file.status === 'replaced' ? 'Заменён' : 'Удалён'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem' }}>
-                          {file.status === 'active' && (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button
-                                onClick={() => handleReplaceFile(file.id)}
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '720px' }}>
+                      <thead>
+                        <tr style={{ background: '#f4e9d6', borderBottom: `2px solid ${primaveraPalette.border}` }}>
+                          {['№', 'Дата / Время', 'Название файла', 'Размер', 'Кем добавлен', 'Статус', 'Действия'].map((title) => (
+                            <th
+                              key={title}
+                              style={{
+                                padding: '0.75rem',
+                                textAlign: 'left',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                color: '#4b4032',
+                                letterSpacing: '0.01em'
+                              }}
+                            >
+                              {title}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {xmlFiles.map((file, index) => (
+                          <tr
+                            key={file.id}
+                            style={{
+                              borderBottom: `1px solid ${primaveraPalette.border}`,
+                              background: file.status === 'active' ? 'rgba(31,79,123,0.06)' : 'transparent'
+                            }}
+                          >
+                            <td style={{ padding: '0.75rem', fontSize: '0.9rem', color: primaveraPalette.text }}>{index + 1}</td>
+                            <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: primaveraPalette.text }}>{formatDateTime(file.uploaded_at)}</td>
+                            <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 500, color: primaveraPalette.text }}>{file.filename}</td>
+                            <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: primaveraPalette.muted }}>{formatFileSize(file.file_size)}</td>
+                            <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: primaveraPalette.text }}>{file.uploaded_by_name || '-'}</td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span
                                 style={{
-                                  padding: '0.4rem 0.75rem',
-                                  fontSize: '0.8rem',
-                                  background: '#007aff',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: '600'
+                                  padding: '0.25rem 0.65rem',
+                                  borderRadius: '999px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  background: file.status === 'active'
+                                    ? '#2d8a5f'
+                                    : file.status === 'replaced'
+                                    ? '#c28f2c'
+                                    : '#b4443f',
+                                  color: '#fff'
                                 }}
                               >
-                                Заменить
-                              </button>
-                              <button
-                                onClick={() => handleDeleteFile(file.id)}
-                                style={{
-                                  padding: '0.4rem 0.75rem',
-                                  fontSize: '0.8rem',
-                                  background: '#ff3b30',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  cursor: 'pointer',
-                                  fontWeight: '600'
-                                }}
-                              >
-                                Удалить
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    </tbody>
-                  </table>
+                                {file.status === 'active' ? 'Активен' : file.status === 'replaced' ? 'Заменён' : 'Удалён'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {file.status === 'active' && (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                  <button
+                                    onClick={() => handleReplaceFile(file.id)}
+                                    style={{
+                                      padding: '0.4rem 0.95rem',
+                                      fontSize: '0.8rem',
+                                      background: 'linear-gradient(130deg, #1f4f7b, #2f74b5)',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      fontWeight: 600,
+                                      boxShadow: '0 8px 18px rgba(31,79,123,0.28)'
+                                    }}
+                                  >
+                                    Заменить
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteFile(file.id)}
+                                    style={{
+                                      padding: '0.4rem 0.95rem',
+                                      fontSize: '0.8rem',
+                                      background: '#b4443f',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      fontWeight: 600,
+                                      boxShadow: '0 8px 18px rgba(180,68,63,0.25)'
+                                    }}
+                                  >
+                                    Удалить
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                 </div>
               </div>
               )}
@@ -837,45 +873,36 @@ export default function PlannerPageNew({ user }) {
       </div>
 
       {showGanttModal && (
-        <div className="gantt-fullscreen-overlay">
-          <div className="gantt-fullscreen-panel">
-            <div className="gantt-fullscreen-header">
+        <div className="modal-overlay gantt-modal-overlay" style={{ zIndex: 1200 }}>
+          <div className="modal-content gantt-modal-content">
+            <div className="gantt-modal-header">
               <div>
                 <h3 style={{ margin: 0 }}>График секции {selectedSection ? selectedSection.section_number : ''}</h3>
                 {selectedObject && selectedSection && (
-                  <p style={{ margin: '0.25rem 0 0 0', color: '#8e8e93', fontSize: '0.9rem' }}>
+                  <p style={{ margin: '0.25rem 0 0 0', color: primaveraPalette.muted, fontSize: '0.9rem' }}>
                     {selectedObject.name} · {selectedSection.section_name}
                   </p>
                 )}
               </div>
-              <button
-                onClick={handleCloseGantt}
-                style={{
-                  border: 'none',
-                  background: 'rgba(142,142,147,0.16)',
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  fontSize: '1.1rem'
-                }}
-              >
+              <button className="gantt-modal-close" onClick={handleCloseGantt}>
                 ✕
               </button>
             </div>
 
-            <div className="gantt-fullscreen-body">
+            <div className="gantt-modal-body">
               {ganttLoading ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>Загрузка графика...</div>
+                <div className="gantt-modal-state">Загрузка графика...</div>
               ) : ganttError ? (
-                <div style={{ background: '#ffe3e3', color: '#c62828', padding: '1rem', borderRadius: '12px' }}>{ganttError}</div>
+                <div className="gantt-modal-state" style={{ background: '#ffe3e3', color: '#c62828', borderRadius: '12px' }}>
+                  {ganttError}
+                </div>
               ) : ganttWorks.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#8e8e93' }}>
+                <div className="gantt-modal-state">
                   Нет работ для построения графика. Загрузите XML и распределите задания.
                 </div>
               ) : (
-                <>
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                <div className="gantt-modal-scroll">
+                  <div className="gantt-modal-legend">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                       <span style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#d8f3dc', border: '1px solid #9dd9b5' }}></span>
                       <span style={{ fontSize: '0.85rem', color: '#525252' }}>План</span>
@@ -885,8 +912,8 @@ export default function PlannerPageNew({ user }) {
                       <span style={{ fontSize: '0.85rem', color: '#525252' }}>Факт</span>
                     </div>
                   </div>
-                  <div className="gantt-chart-container" ref={ganttContainerRef} style={{ flex: 1 }}></div>
-                </>
+                  <div className="gantt-chart-container gantt-modal-chart" ref={ganttContainerRef}></div>
+                </div>
               )}
             </div>
           </div>
