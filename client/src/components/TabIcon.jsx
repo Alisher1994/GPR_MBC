@@ -132,6 +132,38 @@ const icons = {
       <path d="m8 9 4-4 4 4" />
       <path d="M4 19h16" />
     </svg>
+  ),
+  folder: (size) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h5l2 3h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+      <path d="M12 11v6" />
+      <path d="m9 14 3-3 3 3" />
+    </svg>
+  ),
+  check: (size) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 12l2 2 4-4" />
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 10h18" />
+    </svg>
   )
 };
 

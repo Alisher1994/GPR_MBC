@@ -485,19 +485,27 @@ export default function PlannerPageNew({ user }) {
                 <span style={badgeStyle}>
                   {objects.length}
                 </span>
+                <button 
+                  onClick={() => setShowObjectModal(true)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: 'transparent',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    cursor: 'pointer',
+                    fontSize: '1.25rem',
+                    fontWeight: '300',
+                    color: '#007aff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  +
+                </button>
               </h3>
-              <button 
-                className="btn btn-primary btn-small"
-                onClick={() => setShowObjectModal(true)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  borderRadius: '10px'
-                }}
-              >
-                + Добавить
-              </button>
             </div>
 
             <div style={listContainerStyle}>
@@ -573,21 +581,29 @@ export default function PlannerPageNew({ user }) {
                 {sections.length > 0 && (
                   <span style={badgeStyle}>{sections.length}</span>
                 )}
+                {selectedObject && (
+                  <button 
+                    onClick={() => setShowSectionModal(true)}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: 'transparent',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      cursor: 'pointer',
+                      fontSize: '1.25rem',
+                      fontWeight: '300',
+                      color: '#34c759',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    +
+                  </button>
+                )}
               </h3>
-              {selectedObject && (
-                <button 
-                  className="btn btn-primary btn-small"
-                  onClick={() => setShowSectionModal(true)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    borderRadius: '10px'
-                  }}
-                >
-                  + Добавить
-                </button>
-              )}
             </div>
 
             {!selectedObject ? (
@@ -674,83 +690,25 @@ export default function PlannerPageNew({ user }) {
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 {selectedSection && (
                   <>
-                    <button
-                      onClick={handleShowGantt}
-                      disabled={ganttLoading}
-                      style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        border: '1px solid rgba(0,0,0,0.1)',
-                        background: '#fff',
-                        color: '#1c1c1e',
-                        cursor: ganttLoading ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      <TabIcon name="chart" size={16} />
-                      {ganttLoading ? 'График...' : 'График'}
-                    </button>
-                    <button
-                      onClick={() => handleExportSection('full')}
-                      disabled={exporting !== null}
-                      style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        border: 'none',
-                        background: '#007aff',
-                        color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      <TabIcon name="download" size={16} />
-                      {exporting === 'full' ? 'Экспорт...' : 'Выгрузить проект'}
-                    </button>
-                    <button
-                      onClick={() => handleExportSection('actual')}
-                      disabled={exporting !== null}
-                      style={{
-                        padding: '0.5rem 0.9rem',
-                        borderRadius: '10px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        border: 'none',
-                        background: '#30d158',
-                        color: '#fff',
-                        cursor: exporting ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      <TabIcon name="download" size={16} />
-                      {exporting === 'actual' ? 'Экспорт фактов...' : 'Выгрузить факты'}
-                    </button>
+                    {/* Кнопка 1: Загрузить XML из ПК */}
                     <label 
+                      title="Загрузить XML из ПК"
                       style={{
-                        padding: '0.5rem 0.9rem',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        borderRadius: '10px',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: 'transparent',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                         cursor: loading ? 'not-allowed' : 'pointer',
                         opacity: loading ? 0.6 : 1,
-                        background: '#30d158',
-                        color: '#fff',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.4rem'
+                        justifyContent: 'center',
+                        color: '#ff9500'
                       }}
                     >
-                      <TabIcon name="upload" size={16} />
-                      {loading ? 'Загрузка...' : 'Загрузить XML'}
+                      <TabIcon name="folder" size={18} />
                       <input
                         type="file"
                         accept=".xml"
@@ -759,6 +717,69 @@ export default function PlannerPageNew({ user }) {
                         style={{ display: 'none' }}
                       />
                     </label>
+                    {/* Кнопка 2: График */}
+                    <button
+                      onClick={handleShowGantt}
+                      disabled={ganttLoading}
+                      title="Диаграмма Ганта"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: 'transparent',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        cursor: ganttLoading ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#5856d6'
+                      }}
+                    >
+                      <TabIcon name="chart" size={18} />
+                    </button>
+                    {/* Кнопка 3: Выгрузить проект */}
+                    <button
+                      onClick={() => handleExportSection('full')}
+                      disabled={exporting !== null}
+                      title="Выгрузить проект"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: 'transparent',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#007aff'
+                      }}
+                    >
+                      <TabIcon name="download" size={18} />
+                    </button>
+                    {/* Кнопка 4: Выгрузить факты */}
+                    <button
+                      onClick={() => handleExportSection('actual')}
+                      disabled={exporting !== null}
+                      title="Выгрузить факты"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: 'transparent',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#34c759'
+                      }}
+                    >
+                      <TabIcon name="check" size={18} />
+                    </button>
                   </>
                 )}
               </div>
