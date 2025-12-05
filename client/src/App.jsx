@@ -3,7 +3,7 @@ import './App.css';
 import Login from './components/Login';
 import PlannerPageNew from './pages/PlannerPageNew';
 import ForemanPageNew from './pages/ForemanPageNew';
-import SubcontractorPage from './pages/SubcontractorPage';
+import SubcontractorPageNew from './pages/SubcontractorPageNew';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -41,7 +41,7 @@ function App() {
       case 'foreman':
         return <ForemanPageNew user={user} />;
       case 'subcontractor':
-        return <SubcontractorPage user={user} />;
+        return <SubcontractorPageNew user={user} />;
       default:
         return <div>Неизвестная роль пользователя</div>;
     }
